@@ -64,18 +64,17 @@ Our static checker that will be discussed in Section~\ref{sec:dis} finds that th
 \begin{comment}
 \begin{figure}[h]
   \centering
-  \begin{subfigure}[t]{0.5\textwidth}
-  \includegraphics[width=0.95\columnwidth]{figs/any}
-  \caption{Inefficient API}
-  
-  \label{fig:any}
+  \begin{subfigure}
+      \includegraphics[width=0.95\columnwidth]{figs/any}
+      \caption{Inefficient API}
+      
+      \label{fig:any}
   \end{subfigure}
   
-    \centering
-  \begin{subfigure}[t]{0.5\textwidth}
-  \includegraphics[width=0.95\columnwidth]{figs/exists}
+  \begin{subfigure}
+    \includegraphics[width=0.95\columnwidth]{figs/exists}
   	\caption{Efficient API}
-  \label{fig:exists}
+    \label{fig:exists}
   \end{subfigure}
 
   \caption{Inefficient query due to improper APIs in Onebody}
@@ -83,29 +82,42 @@ Our static checker that will be discussed in Section~\ref{sec:dis} finds that th
 \end{figure}
 \end{comment}
 
+% \begin{figure}
+% \centering
+% \label{fig:sl}
+%     \begin{subfigure}
+%     \centering
+%         \includegraphics[width=0.4\linewidth]{hownotto/partialA.pdf}
+%       \caption{Inefficient partial rendering}
+%          \label{fig:partialA}
+%     \end{subfigure}
+%     \begin{subfigure}
+%         \centering
+%         \includegraphics[width=0.4\linewidth]{hownotto/partialB.pdf}
+%       \caption{Efficient partial rendering}
+%         \label{fig:partialB} 
+%     \end{subfigure}
+% \caption{Inefficient partial rendering in Gitlab}
+% \end{figure}
+
 \begin{figure}
-  \vspace{-0.05in}
   \centering
-  \begin{subfigure}[t]{60mm}
-
-\includegraphics[width=0.95\columnwidth]{figs/spreeAny}
-  \caption{Inefficient}
-  
-  \label{fig:spreeAny}
-  \end{subfigure}
-  
+  \begin{subfigure}
     \centering
-  \begin{subfigure}[t]{60mm}
-  \includegraphics[width=0.95\columnwidth]{figs/spreeExists}
-  	\caption{Efficient}
-    
-  \label{fig:spreeExists}
+    \includegraphics[width=0.5\columnwidth]{figs/spreeAny}
+    \caption{Inefficient}
+    \label{fig:spreeAny}
   \end{subfigure}
-
+  
+  \begin{subfigure}
+      \centering
+      \includegraphics[width=0.5\columnwidth]{figs/spreeExists}
+      \caption{Efficient}
+      \label{fig:spreeExists}
+  \end{subfigure}
   \caption{Different APIs cause huge performance difference}
   %Inefficient query due to improper APIs in Spree}
   \label{fig:spreeAnyVsExists}
-  \vspace{-0.25in}
 \end{figure}
 
 Another common problem is developers using API calls that generate queries with unnecessary ordering of the results. For example, Ror, Diaspora, and Spree developers use \texttt{Object.}\texttt{where(c).first} to get an object satisfying predicate \texttt{c} instead of \texttt{Object.find\_by(c)}, not realizing that the former API orders {\tt Object}s by primary key after evaluating predicate {\tt c}. 
