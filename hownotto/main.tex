@@ -1,0 +1,218 @@
+ \documentclass[sigconf]{acmart}
+
+\usepackage{booktabs} % For formal tables
+\usepackage{verbatim}
+\usepackage{soul}
+\usepackage{color,calc}
+\PassOptionsToPackage{bookmarks=false}{hyperref}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{comment}
+\usepackage{xspace}
+\usepackage{subcaption}
+\usepackage[inline]{aplcomments}
+\usepackage{multirow}
+\usepackage{tikz}
+\usepackage{color, colortbl}
+\usepackage{flushend}
+\usepackage[font=small,skip=0pt]{caption}
+
+%\usepackage[disabled]{aplcomments}
+\usepackage[labelformat=simple]{subcaption}
+\renewcommand\thesubfigure{(\alph{subfigure})}
+% Copyright
+%\setcopyright{acmcopyright}
+%\setcopyright{acmlicensed}
+\setcopyright{acmlicensed}
+%\setcopyright{usgov}
+%\setcopyright{usgovmixed}
+%\setcopyright{cagov}
+%\setcopyright{cagovmixed}
+
+% DOI
+\acmDOI{10.1145/3180155.3180194}
+
+% ISBN
+\acmISBN{978-1-4503-5638-1/18/05}
+%Conference
+\acmConference[ICSE'18]{ICSE '18: 40th International Conference on
+Software Engineering}{May 27-June 3, 2018}{Gothenburg, Sweden} 
+\acmYear{2018}
+\copyrightyear{2018}
+
+\makeatletter
+\def\subsubsection{\@startsection{subsubsection}{3}%
+  \z@{.5\linespacing\@plus.7\linespacing}{.1\linespacing}%
+  {\normalfont\itshape}}
+\makeatother 
+\acmPrice{15.00}
+
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+            \node[shape=circle,draw,inner sep=1.5pt] (char) {#1};}}
+ \newcommand*\smallcircled[1]{\tikz[baseline=(char.base)]{
+            \node[shape=circle,draw,inner sep=1pt] (char) {#1};}}
+\newcommenter{shan}{1.0,0.0,0.0}
+\newcommenter{junwen}{0.0,1.0,0.0}
+\newcommenter{cong}{0.0,0.8,0.8}
+\newcommenter{alvin}{0.0,1.0,1.0}
+\newcommand{\secref}[1]{Section~\ref{s:#1}}
+\newcommand{\figref}[1]{Figure~\ref{f:#1}}     % for use in text
+
+\newcommand{\numissues}{140\xspace}
+\newcommand{\numacissues}{64\xspace}
+\newcommand{\numpactions}{40\xspace}
+\newcommand{\numconfirmedapi}{53\xspace}
+\newcommand{\numfixedapi}{29\xspace}
+\newcommand{\numconfirmedpaissues}{14\xspace}
+\newcommand{\numfixedpaissues}{7\xspace}
+
+\newcommand{\maxspeedup}{39\xspace}
+
+\newcommand{\eoebefore}{4.17\xspace}
+\newcommand{\eoeafter}{0.69\xspace}
+\newcommand{\serverbefore}{3.57\xspace}
+\newcommand{\serverafter}{0.49\xspace}
+
+\newcommand{\seclabel}[1]{\label{s:#1}}
+
+\newcommand{\lstlabel}[1]{\label{lst:#1}}
+\newcommand{\figlabel}[1]{\label{f:#1}}
+
+
+
+\newcommand{\listref}[1]{Listing~\ref{#1}}
+\definecolor{LightCyan}{rgb}{0.88,1,1}
+%\definecolor{Gray}{gray}{0.9}
+\definecolor{Gray}{rgb}{0.6,0.6,0.6}
+\lstset{language=Ruby,
+                captionpos=b,
+                xleftmargin=.01in,
+                keywordstyle=\color{blue},
+								escapeinside={(*}{*)},
+                %keywordstyle=\color{red},
+                %morekeywords={select,update,insert},
+                %deletekeywords={if,else},
+                %stringstyle=\color{red}\ttfamily,
+								showstringspaces=false,
+								breaklines=true,
+								numbers=none,
+								numbersep=3pt, 
+								tabsize=2,  
+								numberstyle=\tiny\color{gray},
+                commentstyle=\color{brown},
+								basicstyle=\small\ttfamily,
+                escapeinside={@}{@}
+}
+
+\lstset{language=SQL,
+        captionpos=b,
+        xleftmargin=.01in,
+        keywordstyle=\color{blue},
+        showstringspaces=false,
+		breaklines=true,
+		numbers=none,
+		numbersep=3pt, 
+		tabsize=2,  
+		numberstyle=\tiny\color{gray},
+        commentstyle=\color{brown},
+		basicstyle=\small\ttfamily,
+        escapeinside={@}{@}
+}
+
+\begin{document}
+\title{How {\em not} to structure your database-backed web applications:\\
+a study of performance bugs in the wild 
+}
+\titlenote{\tt https://hyperloop.cs.uchicago.edu}
+
+\author{Junwen Yang\\Pranav Subramaniam\\Shan Lu}
+\affiliation{
+  \institution{University of Chicago \\
+  { {\tt \{junwen, psubramaniam, shanlu\}@uchicago.edu} }
+  }
+}
+\author{Cong Yan\\Alvin Cheung}
+\affiliation{
+  \institution{University of Washington\\
+  { {\tt\{congy, akcheung\}@cs.washington.edu}}
+  }
+}
+
+
+
+
+\begin{abstract}
+Many web applications use databases for persistent data storage, and using Object Relational Mapping (ORM) frameworks is a common way to develop such database-backed web applications.
+Unfortunately, developing efficient ORM applications is challenging, as the ORM framework hides the underlying database query generation and execution. This problem is becoming more severe as these applications need to process an increasingly large amount of persistent data. 
+Recent research has targeted specific aspects of performance problems in ORM applications. However, 
+there has not been any systematic study to identify common performance anti-patterns in real-world
+such applications, how they affect resulting application performance, and remedies for them.
+%it is still unclear what are all the performance anti-patterns that are common in real-world ORM applications historically and currently, how they are affecting the performance and scalability of today's ORM applications, and how they might be effectively tackled. 
+
+In this paper, we try to answer these questions through a comprehensive study of 12 representative real-world ORM applications. We generalize 9 ORM performance anti-patterns from more than 200 performance issues that we obtain by studying their bug-tracking systems and
+profiling their latest versions. To prove our point, we manually fix 64 performance issues in their latest versions and obtain a median speedup of 2$\times$ (and up to $\maxspeedup\times$ max) with fewer than 5 lines of code change in most cases. 
+Many of the issues we found have been confirmed by developers, and we have implemented ways to identify other code fragments with similar issues as well.
+\end{abstract}
+
+%
+% The code below should be generated by the tool at
+% http://dl.acm.org/ccs.cfm
+% Please copy and paste the code instead of the example below. 
+%
+\begin{CCSXML}
+<ccs2012>
+<concept>
+<concept_id>10011007.10010940.10011003.10011002</concept_id>
+<concept_desc>Software and its engineering~Software performance</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+<concept>
+<concept_id>10011007.10011074.10011111.10011696</concept_id>
+<concept_desc>Software and its engineering~Maintaining software</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+</ccs2012>
+\end{CCSXML}
+
+\ccsdesc[500]{Software and its engineering~Software performance}
+
+\keywords{performance anti-patterns, Object-Relational Mapping frameworks, database-backed applications, bug study}
+
+% akcheung: add page numbers and remove copyright and title texts
+\settopmatter{printfolios=true}
+\settopmatter{printacmref=false} % Removes citation information below abstract
+%\renewcommand\footnotetextcopyrightpermission[1]{} % removes footnote with conference information in first column
+\pagestyle{plain} % removes running headers
+
+\maketitle
+\input{introduction}
+% * <congy@uw.edu> 2018-02-06T00:43:47.760Z:
+%
+% ^.
+
+\input{background}
+
+\input{methodology}
+
+\input{profilingResult}
+
+\input{mainCauses}
+
+
+\input{optimization}
+
+\input{staticChecker}
+
+\input{discussion}
+
+\input{related}
+
+
+\input{conclusion}
+
+\newpage
+\bibliographystyle{ACM-Reference-Format}
+
+\bibliography{sigproc,confs} 
+
+\end{document}

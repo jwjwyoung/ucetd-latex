@@ -1,0 +1,50 @@
+
+\begin{table}[h]
+\centering
+\caption{Highlight results of our study} 
+\footnotesize{\textmd{(*: all the identified issues are in latest versions of these applications)}}
+ \setlength{\tabcolsep}{1pt} 
+\label{table:highlight}
+\resizebox{0.7\columnwidth}{!}{
+\begin{tabular}{@{}ll@{}}
+\toprule
+\multicolumn{2}{c}{\bf RQ1: How are constraints specified in one software version?}\\
+ 
+{How}    &  2.1 per 100 LoC            \\
+%\cmidrule(l){2-2} 
+Many?              &  1.4 per 1 data field       \\ 
+% \cmidrule(l){2-2} 
+                              & 77\% of data fields have constraints\\
+%                              \midrule
+\multirow{2}{*}{Where?}       & 76\% in DB; 23\% in application; 1\% in front-end     \\  
+%\cmidrule(l){2-2} 
+                              & 24\% of application constraints are missing in DB\\
+                             
+                              \midrule
+\multicolumn{2}{c}{\bf RQ2: How are constraints specified across versions?}\\
+ 
+                                & 49\% of versions contain constraint changes  \\
+                                & $>$ 25\% of changes tighten constraints on existing data fields\\
+                                
+\midrule                                 
+\multicolumn{2}{c}{\bf RQ3: What led to real-world constraint problems?}\\ 
+ 
+Where       & 21\% of \numissues studied issues\\
+What        & 51\% of \numissues studied issues\\
+When        & 10\% of \numissues studied issues\\
+How         & 18\% of \numissues studied issues\\
+\midrule 
+\multicolumn{2}{c}{\bf RQ4: Can we identify constraint problems in latest version?}\\
+Where       & 1000+ string fields have length constraints in DB but not in app. \\
+            & 200+ fields forbidden to be {\tt null} in app. but {\tt null} by default in DB\\  
+            & 88 fields required to be unique in app. but not so in DB\\
+            & 57 in(ex)clusion constraints specified in app. but missed in DB\\
+            & 133 conflicting length/numericality constraints between app. and DB\\ 
+What        & 19 incorrect case-sensitivity constraints identified\\
+How         & 2 missing error-message problems identified\\
+            & API default error-message enhancement preferred in user study\\
+\bottomrule
+\end{tabular}
+}
+
+\end{table}

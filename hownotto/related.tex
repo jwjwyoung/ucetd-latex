@@ -1,0 +1,37 @@
+\vspace{-0.05in}
+\section{Performance}
+\label{sec:related}
+
+\vspace{-0.025in}
+\paragraph{\bf{Empirical studies}}
+Previous work confirmed that performance bugs are prevalent in open-source C/Java programs
+and often take developers longer time to fix than other types of bugs~\cite{song.pldi12, zaman.msr12}. Prior work~\cite{mark:se17:javascript} studied the performance issues in JavaScript projects. We target performance problems in ORM applications that are mostly related to how application logic interacts with underlying database and are very different from those in general purpose applications. 
+Our recent work \cite{yan:cikm17} looked into the database performance of ORM applications and discussed how better database optimization and query translation can improve ORM application performance. No issue report study or thorough profiling was done. In contrast, our paper performs a comprehensive study on all types of performance issues reported by developers and discovered using profiling. Unnecessary data retrieval (UD), content display trade-offs (DT), and part of the inefficient data accessing (ID) anti-patterns \textcolor{black}{ are the only overlap between this study and our previous work \cite{yan:cikm17} }.
+%In our previous work \cite{yan:cikm17}, we looked into the database queries of these applications and xxx\shan{Cong, can you extend?} \alvin{is this double blinded? If so we can't say in our previous work}.\junwen{It's double blind review} In this paper, we perform a thorough study on all performance issues, reported by developers and discovered by our profiling.
+%In fact, only xx, xx, and xx anti-patterns overlap between our study and the previous work \cite{yan:cikm17}.
+
+\vspace{-0.08in} 
+\paragraph{\bf{Inefficiencies in ORM applications}}
+Previous work has addressed specific performance problems in ORM applications, such as locating unneeded column data retrieval~\cite{chen:se16:redundantData}, N+1 query
+\cite{chen:se14:antipattern}, pushing computation to the DBMS~\cite{cheung:pldi13}, and query batching~\cite{cheung:sigmod14:sloth, dbridge:tkde15, quro}. While effective, these tools do not touch on many anti-patterns discussed in our work, like unnecessary computation (UC), inefficient rendering (IR), database designs (MF, MI), functionality trade-offs (FT), and also do not completely address anti-patterns like inefficient computation (IC) and inefficient data accessing (ID). 
+%there are still many problems left addressed, such as ``Inefficient Query'', ``Should Not be a Query'', ``Redundant Computation'', ``Constant Query'', ``Inefficient Eager Loading'', and database and application design tradeoff problems.
+%, \cite{quro} reorders query in transactions, .
+%synthetic workload generation \cite{pavlo}
+%\cite{bailis.sigmod15} investigates the concurrency control in Rails applications.
+%Plenty of works \cite{taoxie.ase11} \cite{Torlak2012} \cite{shadi.ase11} have been conducted to generate testing loads for DBMS.
+
+%\shan{we need to explain the difference from the CIKM paper?}
+
+\vspace{-0.08in}
+\paragraph{\bf{Performance issues in other types of software}}
+Much research was done to detect and fix performance
+problems in general purpose software
+\cite{song.pldi12,toddler.icse13,caramel.icse15,isil.pldi15,bloat.fse08,harry.pldi09,harry.pldi10}.
+%, such as performance-sensitive API misuses
+%\cite{song.pldi12}, inefficient and redundant loop computation
+%\cite{toddler.icse13, caramel.icse15,isil.pldi15}, object bloat
+%\cite{bloat.fse08,harry.pldi09}, low-utility data structures
+%\cite{harry.pldi10}, etc.
+%Some of these problems share common root causes as some of the ORM performance anti-patterns, such as redundant computation in loop.
+Detecting and fixing ORM performance anti-patterns require a completely different set of techniques that understand ORM and underlying database queries.
+%Redundant computation problem in regular applications \cite{song.pldi12, loop.icse17}.

@@ -1,0 +1,11 @@
+Modern web applications manipulate a large amount of user data and undergo frequent data-schema changes. These changes bring up a unique refactoring 
+task: updating application code to be consistent with data schema. Previous
+ study and our own investigation show that this type of refactoring is 
+error-prone and time-consuming for developers.
+%Schema change requires drastic change in application's implementation.  It's error-prone and non-trivial to keep the application code consistent with the schema change, especially when web applications are often constructed using Object-Relational Mapping frameworks, which allows developers to manipulate persistent data using object-oriented code. Tool support is needed to fulfill this task. 
+This paper presents \Tool, a static code analysis and transformation tool that
+automates schema-related code refactoring and consistency checking. 
+\Tool is implemented as an IDE 
+plugin that works for both Rails and Django applications. 
+%\Tool extracts the schema change, and detects application code which is affected by the schema change and applies fixes automatically. 
+The source code of \Tool is available on Github~\cite{sourcecode} and the plugin can be downloaded from Visual Studio Marketplace~\cite{vscodemarketplace}, with its tutorial available at \url{https://www.youtube.com/watch?v=qBiMkLFIjbE}. 

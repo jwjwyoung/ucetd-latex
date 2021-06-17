@@ -1,0 +1,264 @@
+ 
+%Guided by the patterns discussed above, we explore detecting some of these problems  in the {\bf latest} versions of these 12 applications. 
+
+We now discuss our experience in building tools to automatically discover the anti-patterns discussed earlier. We focus on applying them to the latest versions of the studied applications, as these represent potential bugs that have not been discovered.
+
+\subsection{Where issues}
+
+As discussed in Section~\ref{sec:one_where}, our scripts can automatically find more than 1000 string-length DB constraints that are missing in application, and more than 400 application built-in-validation constraints
+ that are missing in the DB. We reported 16 of them covering different types, with 12 of them already confirmed by developers from 3 applications (Lo, Ds, FF).
+
+In addition, we extended our scripts to automatically find conflicting cases, where
+the same type of constraint, like length, is specified for the same 
+data field in both database and application, but the exact constraint requirement is different.
+
+As shown in Table~\ref{table:mismatchdbmodel}, our checker reported 138 conflicting constraints in total.
+Our manual checking confirmed that 133 of them are true conflicts and 5 are false positives.
+
+These 133 conflicts include 84 cases where
+applications' length constraints are tighter than the DB's, 4 cases in the other way, 1 case where the columns referenced by uniqueness constraints did not exactly match, and 44 cases where the range or type of numeric values allowed in DB did not match the corresponding restriction in the model. 
+For example, our results showed that, in the Tracks application, there was a string field {\tt description} in model {\tt Todo} for which the length in DB was limited to 255 characters, but was limited to 300 in the model. 
+%This would cause requests to fail if a user entered a description between these two lengths. 
+We reported this mismatch to developers and received confirmation that it was indeed a bug. 
+As another example, we found 5 instances in OpenStreetMap where developers meant to require 
+fields to be integers in both the DB and application. However, developers had typos in their use of validation APIs, which caused the application-level numericality constraints to be silently ignored. 
+We reported this to developers, who then fixed the bug.
+
+% \include{reported-issues-table.tex}
+
+% Table~\ref{table:reportedissues} shows the detailed number of our reported and confirmed issues. 
+
+
+%\shan{do you have any good value range example?}\utsav{Pretty much any time a developer specifies a range in model, this results in mismatch, because no explicitly-defined ranges exist in DB layer (i.e. it is always implicit [INT\_MIN, INT\_MAX]). Example follows but we do not report anything because we have no clear solution.} 
+As an example of range mismatch, there was a case in Spree where the field {\tt price} must be greater than or equal to zero. However, in the DB, the field type was {\tt decimal} which allows negative values.
+
+Among the 5 false positives, 3 were caused by our tool's limited ability in handling non-literal expressions, and the others were related to our tool's inability to distinguish between array length and string length validations.
+
+\begin{table} 
+\centering
+\setlength{\tabcolsep}{3pt}  
+\caption{\# Mismatch constraints between DB-Model}
+\resizebox{0.7\columnwidth}{!}{
+\begin{tabular}{lrrrrrrrrrrrr}
+
+\toprule
+& Ds   & Lo  & Gi   & Re  & Sp  & Ro  & Fu & Tr  & Da  & On  & FF  & OS  \\
+\midrule
+Length - DB looser & 5 & 7 & 12 & 9 & 0 & 25 & 0 & 4 & 4 & 11 & 0 & 7\\
+\midrule
+Length - DB tighter  & 0 & 0 & 0 & 0 & 0 & 3 & 0 & 1 & 0 & 0 & 0 & 0 \\
+\midrule
+Uniqueness  & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+\midrule
+Numericality  & 4 & 0 & 24 & 1 & 6 & 0 & 3 & 0 & 0 & 0 & 3 & 3 \\
+\midrule
+{\it False positives}  & 0 & 0 & 2 & 3 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+\midrule
+Total  & 10 & 7 & 38 & 13 & 6 & 28 & 3 & 5 & 4 & 11 & 3 & 10 \\
+% \midrule
+% Reported & 5 & 6 & 0 & 1 & 0 & 0 & 0 & 1 & 1 & 0 & 3 & 20 \\
+% \midrule
+% Confirmed & 2 & 6 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 0 & 3 & 20 \\ 
+
+% data source https://docs.google.com/spreadsheets/d/1d9wh0BxLLgQaSKSxFTA3ou5RH7P5D8LKaHQ1paU45u8/edit?usp=sharing
+\bottomrule
+\end{tabular}
+\vspace{-0.3in}
+}
+\label{table:mismatchdbmodel}
+\end{table}
+
+
+\subsection{What issues}
+We built a checker to detect ``case-sensitivity conflicts'' discussed
+in Section~\ref{sec:what_app}. Our checker first identifies every field that has case insensitive constraints specified by the validation API {\tt validates\_ uniqueness\_of:field} and {\tt case\_sensitive:false}, then checks all the statements that issue a read query to load such a field to see if the loading is ever done in a case sensitive way. To identify all those read queries, we
+used an existing static analysis framework for Rails~\cite{yang:fse18:powerstation}; to identify case-sensitive loading, we check whether the query is directly ordered by the field 
+({\tt .order(`field')}) or filtered on the field ({\tt .where(field: params)}) 
+without case conversion. 
+
+Our checker found 19 issues in latest versions --- 14 in Lobsters, 3 in Redmine, 2 in Tracks. Our manual checking confirmed these are all bugs (no false positives). We also got confirmation
+from developers of Lobsters and Redmine. Redmine has already added our patch to their next major release 4.1.0. 
+
+
+\subsection{When issues}
+
+Given two code versions, to detect inconsistency between old data and new constraints, we extend our script that examines constraint changes across versions (Section~\ref{sec:evolve}) to see if new constraints are added or existing
+constraints are tightened. We then further check whether the application allows editing existing
+DB data, whether the default value conflicts with the new/changed constraint, and whether the migration
+file updates the corresponding column in the database, which is a common way to avoid incompatibility
+problems. Due to space constraints, we omit details of the algorithm.
+%by checking the properties of the constraint for example whether the inclusion array of an inclusion constraint has shrunken\shan{how do you know it is tightened or not? Do you only reason about tightening
+%for specific type of constraints?}. 
+%If there is a new/tightened application built-in validation constraint, our checker further checks if the 
+%related object can be edited in the application by checking whether there is an edit action that will update or save the object \shan{how do you know it is edited?} --- if it can,
+%this is a potential problem;
+%if there is a new/tightened DB constraint, our checker checks if the default value of that data field, 
+%which is specified in migration files and assumed to satisfy the new/tightened constraint\shan{do you need some
+%kind of symbolic reasoning to know this?} --- if it does not, this is a potential problem. 
+%In both cases, our checker also checks the migration files to see if there are statements there that 
+%convert old data to match the new constraints\shan{how exactly is that checking done?}\junwen{To avoid false positive, what I have done here is to check whether the migration file has any statement to update the field or set the default value, if there is, I will consider it's used to meet the new/tightened constraints}. If there is a new/tightened html validation constraint, we check whether they are generated from the login form of the application, if so, they might prevent users from logging. 
+
+We applied our checker to the problematic upgrade pointed out by the 12 known issues in our study
+(Section~\ref{subsec:when}), and confirmed that it can detect all these 12 issues with no false positives. It did not find problems with the latest upgrade 
+%\shan{two commits? two releases?} \junwen{for app with release, it's release, for app without release, it's the latest commit and (latest - 100)th commit}
+of these applications.  
+%TODO for future: apply to every commit 
+
+\subsection{How issues}
+\label{sec:how}
+%To understand how the error message is delivered generally, we have collected the statistics about default/customized error messages of built-in validation API, and also whether error message is created for customized validation API and non-API sanity checking. 
+
+\paragraph{\bf Improving built-in error messages.} 
+Rails built-in validation APIs provide default error messages that are used
+by developers in most cases, only overridden
+in 2\% of the cases across all studied applications. Consequently,
+having informative default messages is crucial.
+
+\begin{table} 
+\centering
+\setlength{\tabcolsep}{2pt}  
+\caption{Our enhancement to default error messages}
+\resizebox{0.7\columnwidth}{!}{
+\begin{tabular}{lll}
+\toprule
+& Default & Enhanced\\
+\midrule 
+{\tt inclusion\_of} &``invalid''& ``have to take values from \{A, B, ...\}''\\
+\midrule
+{\tt exclusion\_of} &``reserved''& ``cannot take values from \{A, B, ...\}''\\
+\midrule 
+{\tt confirmation\_of}& ``invalid''&``Case does not match with earlier input''\\
+\midrule
+{\tt uniqueness\_of}&``invalid''&``Not unique in case (in)sensitive comparison''\\
+\midrule 
+{\tt associated}&``o is invalid''& ``field f of object o is invalid''\\
+\bottomrule
+\end{tabular}
+%\vspace{-0.1in}
+}
+\label{table:msgenhance}
+\end{table}
+
+\begin{table}[]
+\centering
+\caption{User study results}
+\footnotesize{
+\setlength{\tabcolsep}{2pt}  
+%\resizebox{\columnwidth}{!}{
+\begin{tabular}{lrrr}
+\toprule 
+% & \multicolumn{3}{c}{Form input - average \# of input attempts} \\
+%\cmidrule{2-4}
+Task-1    & \# input attempts w/ modified & \# attempts w/ default & Decrease \\
+\midrule
+Inclusion & 2.2 & 3.1 & 30\% \\ \midrule
+Associated & 2.3 & 3.4 & 33\% \\
+\midrule
+\midrule
+%& \multicolumn{3}{c}{User preference}  \\
+%\cmidrule{2-4}
+Task-2 & \% of users prefer modified &  \% prefer default & No preference\\ 
+\midrule
+Exclusion  & 74\%  & 22\% & 4\%  \\ \midrule
+Confirmation  & 81\%  & 8\%  & 11\%  \\ \midrule
+Uniqueness  & 74\%  & 16\%  & 10\%  \\
+\bottomrule
+\end{tabular}
+%\vspace{-0.1in}
+%}
+}
+\label{table:studyresults}
+\footnotesize{}
+\end{table}
+
+
+We found that 5 APIs' default messages can be more informative, as shown in Table~\ref{table:msgenhance}. 
+For example, {\tt validates\_confirmation\_of} ensures that a
+field and its confirmation field have the same content. Instead of only saying the input is ``invalid,''
+%{\tt validates\_uniqueness\_of} repo whether an input value is unique. 
+%In practice, the violation is often caused by case sensitivity.
+we add information on whether the matching failure is caused by case sensitivity, 
+so the user can decide whether to change just the case or the actual value.
+As another example, {\tt validates\_associated} checks if every field of a sub-object $o$, which is associated with another object, is valid (e.g., a ``photo'' is a nested object of ``profile'', and has
+fields ``source\_url'', ``width'', ``height'').
+%\shan{what is a sub-object? Can you give a concrete but brief example?}\junwen{say an account is associated with a user, user is the object with validates\_associated: account, account is the subobject, when saving the user, it will tell you `account is invalid', will not tell you the detailed reason why account is invalid as described in the StackOverflow post
+If the validation of any field of $o$ fails, the default message states only that the entire 
+$o$ is invalid. 
+Our enhancement lets the user know which specific field (e.g., ``source\_url'' or ``width'' or ``height'') is incorrect and how to revise.
+
+%\shan{shan: Please provide more details about why they are not informa-tive and what exact enhancement you did} 
+
+We have implemented a library (i.e., a Ruby gem) to overwrite the Rails default error message with our advanced ones. Our gem redefined the existing error message generation functions with custom ones that incorporated more information. 
+
+\paragraph{User Study} To evaluate our error-message changes, we recruited 100 participants using Amazon Mechanical Turk (MTurk). The participants are all live in US and are at least 18 years old with higher than 95\% MTurk Task Approval rate.
+We asked users to perform two tasks. First, users provided answers to questions such as, enter a title, first name, and last name; or try and enter a unique value for a given category. If they fail to provide a valid answer, we either provide them with the Rails default error message, or our improved error message. In each case, we track the number of retries required for the user to reach a valid input, and if they cannot after 5 retries, we skip to the next question. Each user was given 2 of these tasks.
+In the second task, we provide a webpage screenshot of a question and an incorrect answer-input to that question. The questions are based on the applications we studied. We then show two options for error messages: the default message and the improved  message. We ask the user to rate which error message would be more helpful in arriving at a valid input. Each user was given 3 of these tasks.
+
+ As shown in Table~\ref{table:latestconstraintnum},  
+for the first task, our enhanced error messages reduced the number of tries users took to reach valid inputs by about 30\%;
+for the second task, we find 74--81\% of users preferred our enhanced error messages, depending on the type of validation.
+
+
+
+\paragraph{\bf Detecting missed error messages.} Developers are required to provide error messages for 
+custom validations through the API {\tt object.errors.add(msg)}. We extend our script that identifies custom validation functions to further check
+if an error message is provided.
+We found one case in Diaspora where the error message is missing. This is actually a severe problem:
+since Rails uses the count of error messages to determine the validity of an object, an invalid object
+can then be incorrectly treated as valid and lead to application failures. 
+We reported this bug to Diaspora developers, who have confirmed that this is indeed a bug.
+%\shan{Can you guys report this case to the developers? sound severe?}
+
+\paragraph{\bf Detecting missed error rendering.}
+%It is also possible that developers may simply forget to display already specified error messages. 
+Since there are many ways to render error messages on a web page, it is difficult to automatically
+detect this problem.
+We randomly chose 45 HTML pages with forms across 12 applications, and manually checked if error messages caused by invalid inputs were rendered.
+We found one case where the message would never be rendered: 
+%One case is related to a URL-type field, 
+on a page in OpenStreetMap that asks users to input a URL,
+%register OAuth clients. 
+when the input has an improper format, the web page
+marks the field with red color, without rendering the error message associated with the
+constraint. 
+%Another case turns out to be a false positive: although the error message associated with length validation is never rendered, there is a front-end HTML constraint that conducts the same validation and does render an error message when there is a violation.
+
+%%%%%%%%%%%%%%%%COMMENT OUT%%%%%%%%%%%%%%
+\iffalse 
+\begin{table}[h]
+\caption{\# Messages overridden by developer (built-in API)}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{lrrrrrrrrrrrr}
+
+\toprule
+& Ds   & Lo  & Gi   & Re  & Sp  & Ro  & Fu & Tr  & Da  & On  & FF  & OS  \\
+\midrule
+total (built-in) & 151 & 31 & 439 & 223 & 118 & 213 & 10 & 26 & 99 & 66 & 14 & 79\\
+\midrule
+overridden  & 0 & 0 & 17 & 2 & 3 & 1 & 3 & 3 & 0 & 2 & 0 & 0 \\
+\bottomrule
+\end{tabular}
+}
+\label{table:builtinerrormsg}
+\end{table}
+\fi 
+
+\iffalse 
+\begin{table}[h]
+\caption{\# Messages missing from custom validations}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{lrrrrrrrrrrrr}
+
+\toprule
+& Ds   & Lo  & Gi   & Re  & Sp  & Ro  & Fu & Tr  & Da  & On  & FF  & OS  \\
+\midrule
+total (custom) & 18 & 3 & 31 & 28 & 14 & 8 & 0 & 3 & 9 & 17 & 3 & 1\\
+\midrule
+missing  & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
+\bottomrule
+\end{tabular}
+}
+\label{table:customerrormsg}
+\end{table}
+
+\fi 

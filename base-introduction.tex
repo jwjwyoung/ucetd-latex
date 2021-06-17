@@ -1,0 +1,24 @@
+Modern web applications face the challenge of processing a growing amount of data while serving increasingly impatient users. On one hand, popular web applications typically increase their user bases by 5--7\% per week in the first few years~\cite{startup}, with quickly growing data that is produced or consumed by these users and is managed by applications. 
+%\alvin{does growing number of users always imply mean growing data size? I don't think so. Take news website for instance. Does more viewers mean more news??} \junwen{except for user, we can also show the data for the posts growth for facebook and other applications: Every 60 seconds on Facebook, 510,000 comments are posted, 293,000 statuses are updated, and 136,000 photos are uploaded.\cite{facebook:2}}
+%Twitter\cite{twitter} has shown that their monthly active users worldwide have increased from 30 million to 328 million during 2010 to 2017.
+On the other hand, studies have shown that nearly half of the users expect a site to load in less than 2 seconds and will abandon a site if it is not loaded within 3 seconds \cite{akamai2011}, while every extra 0.5 second of latency reduces the overall traffic by 20\% \cite{google.2006}.
+
+% ORM 
+%\alvin{I suggest add a paragraph here to first briefly describe how database-backed web apps are constructed. This will also be a good time to introduce ORMs, and then say developing apps that are efficient requires cross stack understanding}
+
+To manage large amounts of data, modern web applications often follow a three-stack architecture: (1) a web interface developed by markup language like HTML (2) application logic developed by traditional object-oriented languages, and (3) a database management system (DBMS) that maintains persistent data.
+To help developers %who are mostly not database experts 
+construct such database-backed web applications, Object Relational Mapping (ORM) frameworks have become increasingly popular, with implementations in all common general-purpose languages: 
+the Ruby on Rails framework (Rails) for Ruby \cite{ror}, Django for Python \cite{django}, and Hibernate for Java \cite{hibernate}. These ORM frameworks allow developers to program such database-backed web applications in a DBMS oblivious way, as the frameworks expose APIs for developers to operate persistent data stored in the DBMS as if they are regular heap objects, with regular-looking method calls transparently translated to SQL queries by frameworks when executed.
+
+Under this architecture, performance and correctness problems are common without cross-stack analysis. For example, application developers
+may not know what DB queries are issued at run time, DBMS may miss query-optimization opportunities without knowing high-level application logic, and
+web designers often have no idea about the DB cost of generating particular HTML tags, which all lead to performance problems. Furthermore, data constraints
+and specifications, which are key to the correctness of data-centered applications, are difficult to maintain across stacks, which can lead to severe correctness problems. It is also difficult for developers to keep their code 
+consistent with database schema changes all the time,
+
+To tackle these problems, on the performance side, I have conducted a comprehensive study of performance issues in real-world DB-backed web applications~\cite{yang2018not} and developed techniques to tackle each main category of performance problems revealed by my study~\cite{yang:fse18:powerstation,yang2019panorama}, detecting and fixing \textit{thousands} of performance issues in 
+latest versions of popular web applications along the way. On the correctness side, I have conducted an in-depth empirical study about data constraint problems in
+real-world DB-backed web applications and developed static checkers that identified \textit{thousands} of data constraint issues~\cite{yang2020managing}, which can lead to software crashes and severe failures. I have also conducted an empirical study on the schema change and developed  \ETool{} which detects 
+schema-code inconsistency and suggests refactoring in
+web applications. 

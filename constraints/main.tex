@@ -1,0 +1,179 @@
+\documentclass[sigconf]{acmart}
+
+\usepackage{booktabs} % For formal tables
+\usepackage{verbatim}
+\usepackage{soul}
+\usepackage{color,calc}
+\PassOptionsToPackage{bookmarks=false}{hyperref}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{comment}
+\usepackage{xspace}
+\usepackage{subcaption}
+\usepackage{multirow}
+\usepackage{tikz}
+\usepackage{color, colortbl}
+\usepackage{flushend}
+\usepackage[skip=10pt]{caption}
+
+%\usepackage[labelformat=simple]{subcaption}
+\usepackage[disabled]{aplcomments}
+
+%\usepackage[inline]{aplcomments}
+\newcommenter{shan}{1.0,0.0,0.0}
+\newcommenter{junwen}{0.0,1.0,0.0}
+\newcommenter{utsav}{1.0, 0.5, 0.0}
+\newcommenter{cong}{0.0,0.8,0.8}
+\newcommenter{alvin}{0.0,1.0,1.0}
+%\usepackage[disabled]{aplcomments}
+%\renewcommand\footnotetextcopyrightpermission[1]{} 
+\usepackage[justification=centering]{caption}
+\usepackage{flushend}
+\usepackage[labelformat=simple]{subcaption}
+\newcommand{\seclabel}[1]{\label{s:#1}}
+\newcommand{\lstlabel}[1]{\label{lst:#1}}
+\newcommand{\figlabel}[1]{\label{f:#1}}
+\settopmatter{printacmref=false}
+
+
+\newcommand{\tabref}[1]{Table~\ref{table:#1}}
+\newcommand{\figref}[1]{Figure~\ref{fig:#1}}
+\newcommand{\secref}[1]{Section~\ref{sec:#1}}
+\newcommand{\secrefs}[2]{Sections~\ref{sec:#1}-\ref{sec:#2}}
+\newcommand{\ssecref}[1]{Sec.~\ref{sec:#1}}
+\newcommand{\appref}[1]{Appendix~\ref{sec:#1}}
+\newcommand{\algref}[1]{Algorithm~\ref{alg:#1}}
+\newcommand{\listref}[1]{Listing~\ref{list:#1}}
+
+
+\newcommand{\numissues}{114\xspace}
+\newcommand{\numreportedissues}{56\xspace}
+\newcommand{\numconfirmedissues}{49\xspace}
+\newcommand{\numunconfirmedissues}{7\xspace}
+\newcommand{\nummergedissues}{23\xspace}
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+
+%\setcopyright{none}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+    
+\begin{abstract}
+Database-backed web applications manipulate large amounts of persistent data, and such applications often contain constraints that restrict data length, data value, and other data properties. Such constraints are critical in ensuring the reliability
+and usability of these applications.
+%There are often constraints associated with data used in software, restricting data length, value, uniqueness, and other properties. These constraints are particularly crucial for the reliability, maintainability, and usability of database-backed web applications, where a huge amount of structured data is expected to persist in database and serve web users throughout software upgrade and database migration.
+In this paper, we present a comprehensive study on where data constraints are expressed, what they are about, how often they evolve, and how their violations are handled. The results show that developers struggle with maintaining consistent data constraints and checking them across different components and versions of their web applications, leading to various problems.
+%led to many real-world software reliability, maintainability, and usability problems. 
+Guided by our study, we developed checking tools and API enhancements that can automatically detect such problems and improve the quality of such applications.
+
+%problems in data-constraint specification and violation handling.
+
+\end{abstract}
+\begin{document}
+
+\copyrightyear{2020} 
+\acmYear{2020} 
+\setcopyright{acmcopyright}
+\acmConference[ICSE '20]{42nd International Conference on Software Engineering}{May 23--29, 2020}{Seoul, Republic of Korea}
+\acmBooktitle{42nd International Conference on Software Engineering (ICSE '20), May 23--29, 2020, Seoul, Republic of Korea}
+\acmPrice{15.00}
+\acmDOI{10.1145/3377811.3380375}
+\acmISBN{978-1-4503-7121-6/20/05}
+
+\title{
+Managing data constraints in database-backed web applications
+% {\footnotesize}
+%\thanks{http://hyperloop.cs.uchicago.edu/panorama}
+}
+
+ \author[J. Yang]{Junwen Yang}
+\affiliation{
+University of Chicago \country{USA} 
+}
+\email{junwen@uchicago.edu}
+ \author[U. Sethi]{Utsav Sethi}
+\affiliation{
+ University of Chicago\country{USA} 
+}
+\email{usethi@uchicago.edu}
+ \author[C. Yan]{Cong Yan}
+\affiliation{University of Washington\country{USA} 
+}
+\email{congy@cs.washington.edu}
+
+ \author[A. Cheung]{Alvin Cheung}
+\affiliation{
+  University of California, Berkeley\country{USA} 
+}
+\email{akcheung@cs.berkeley.edu}
+
+ \author[S. Lu]{Shan Lu}
+\affiliation{
+  University of Chicago\country{USA} 
+}
+\email{shanlu@uchicago.edu}
+
+\pagestyle{plain}
+
+\maketitle
+
+\section{Introduction}
+\input{introduction}
+% * <congy@uw.edu> 2018-02-06T00:43:47.760Z:
+%
+% ^.
+\section{Background}
+\input{background}
+
+
+
+\section{Methodology}
+\label{sec:meth}
+\input{methodology}
+
+
+\section{Constraints in one version}
+\label{sec:wherewhat}
+\input{expression}
+
+\section{Constraints   across versions}
+\label{sec:evolve}
+\input{statistics}
+
+\section{Constraint-related issues}
+\label{sec:causes}
+\input{causes}
+
+ \section{Solutions \& Evaluation}
+\label{sec:solution}
+ \input{solution}
+ 
+
+\section{Discussion}
+\label{sec:threats}
+\input{threats}
+
+\section{Related work
+}
+\input{related}
+
+
+\section{Conclusion}
+
+\input{conclusion}
+
+
+\section*{Acknowledgement}
+\input{ack.tex}
+%\section{Acknowledgement}
+%\input{ack}
+
+\newpage
+
+
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{sigproc,confs} 
+
+\end{document}

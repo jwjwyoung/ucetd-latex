@@ -1,0 +1,173 @@
+\begin{comment}
+
+\end{}
+
+\newcolumntype{g}{>{\columncolor{Gray}}r}
+\begin{table*}[]
+\centering
+\small
+\caption{Causes for problematic actions and performance issues}
+\label{tab:freq}
+\begin{tabular}{@{}llggggggggggggg@{}}
+\toprule
+
+\rowcolor{white}
+ & Causes &Ds & Lo & Gi & Re & Sp & Ro & Fu & Tr & Da & On & FF & OS& SUM  \\
+ \midrule
+\rowcolor{white}
+ & Inefficient  & { 0} & {0} & 0 & 0 & 0 & 1 & 0 & 1 & 2 & 2 & 2 & 0 & 8 \\
+\cmidrule{3-15}
+ & computation & 0 & 0 & 3 & 6 & 5 & 0 & 0 & 2 & 2 & 0 & 0 & 0 & 18 \\ 
+\cmidrule{2-15}
+
+\rowcolor{white}
+ & Unnecessary  & 0 & 3 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 2 & 0 & 5 \\
+\cmidrule{3-15}
+API & Computation & 1 & 0 & 3 & 4 & 4 & 1 & 0 & 1 & 2 & 1 & 0 & 0 & 17 \\
+\cmidrule{2-15}
+
+\rowcolor{white}
+Usage & Inefficient  & 0 & 1 & 0 & 0 & 3 & 2 & 0 & 2 & 2 & 3 & 0 & 1 & 14 \\
+\cmidrule{3-15}
+ &data accessing  & 3 & 0 & 4 & 5 & 10 & 0 & 0 & 2 & 0 & 2 & 0 & 0 & 26 \\
+\cmidrule{2-15}
+\rowcolor{white}
+ & Unnecessary & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\
+\cmidrule{3-15}
+ & data loading  & 2 & 0 & 3 & 1 & 2 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 8 \\
+\cmidrule{2-15}
+ \rowcolor{white}
+ & Inefficient Rendering & 0 & 3 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 5 \\
+\midrule
+
+
+\rowcolor{white}
+ & Missing  & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 3 \\
+\cmidrule{3-15}
+ & Fields & 0 & 2 & 0 & 0 & 2 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 5 \\
+\cmidrule{2-15}
+
+\rowcolor{white}
+Database& Missing  & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 1 \\
+\cmidrule{3-15}
+ Design& association & 0 & 1 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 3 \\
+ 
+\cmidrule{2-15}
+
+\rowcolor{white}
+   & Missing  & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 2 & 0 & 3 \\
+\cmidrule{3-15}
+ & index & 3 & 1 & 4 & 6 & 3 & 0 & 0 & 3 & 5 & 1 & 1 & 3 & 30 \\
+\midrule
+
+\rowcolor{white}
+& Unworthy  & 1 & 0 & 0 & 2 & 0 & 2 & 6 & 10 & 0 & 1 & 0 & 0 & 22 \\
+\cmidrule{3-15}
+App & content & 5 & 1 & 1 & 0 & 0 & 1 & 0 & 3 & 1 & 0 & 0 & 2 & 14 \\
+ \cmidrule{2-15}
+\rowcolor{white}
+Design & Unworthy  & 0 & 2 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 2 \\
+ \cmidrule{3-15}
+ & features & 3 & 2 & 4 & 0 & 1 & 0 & 2 & 1 & 2 & 1 & 1 & 2 & 19 \\
+ \midrule
+ 
+
+\rowcolor{white}
+SUM &  & 18 & 17 & 24 & 25 & 31 & 7 & 8 & 27 & 17 & 11 & 10 & 9 & 204\\
+\bottomrule
+\end{tabular}
+\\
+\footnotesize{data with white background is for problematic actions from 12 representative applications\\ data with gray background is for performance issues from 12 bug-tracking systems}
+\end{table*}
+\end{comment}
+\definecolor{LightCyan}{rgb}{0.88,1,1}
+%\definecolor{Gray}{gray}{0.9}
+\definecolor{Gray}{rgb}{0.6,0.6,0.6}
+\newcolumntype{g}{>{\columncolor{Gray}}r}
+\begin{table}[]
+\centering
+\small
+\caption{Inefficiency causes across 12 applications}
+\label{tab:freq}
+\begin{tabular}{@{\hspace{0.1in}}c@{\hspace{0.1in}}g@{\hspace{0.1in}}g@{\hspace{0.1in}}g@{\hspace{0.1in}}g@{\hspace{0.1in}}g@{\hspace{0.1in}}g@{\hspace{0.1in}}g@{\hspace{0.1in}}g@{\hspace{0.1in}}g@{\hspace{0.1in}}g@{\hspace{0.1in}}g@{\hspace{0.1in}}g@{\hspace{0.1in}}g@{\hspace{0.1in}}}
+\toprule
+
+\rowcolor{white}
+   &Ds & Lo & Gi & Re & Sp & Ro & Fu & Tr & Da & On & FF & OS& Sum  \\
+ \midrule
+\rowcolor{white}
+\multicolumn{13}{c}{\bf ORM API Misuse}\\
+\midrule
+\rowcolor{white}
+\multirow{ 2}{*}{IC}  & { 0} & {0} & 0 & 0 & 0 & 1 & 0 & 1 & 2 & 2 & 2 & 0 & 8 \\
+\cmidrule{2-14}
+
+  & 0 & 0 & 3 & 6 & 5 & 0 & 0 & 2 & 2 & 0 & 0 & 0 & 18 \\ 
+\cmidrule{1-14}
+
+\rowcolor{white}
+\multirow{ 2}{*}{UC}   & 0 & 3 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 2 & 0 & 5 \\
+\cmidrule{2-14}
+  & 1 & 0 & 3 & 4 & 4 & 1 & 0 & 1 & 2 & 1 & 0 & 0 & 17 \\
+\cmidrule{1-14}
+
+\rowcolor{white}
+ \multirow{ 2}{*}{ID}   & 0 & 1 & 0 & 0 & 3 & 2 & 0 & 3 & 2 & 3 & 0 & 1 & 15 \\
+\cmidrule{2-14}
+   & 3 & 1 & 4 & 5 & 11 & 0 & 0 & 2 & 1 & 2 & 0 & 0 & 29 \\
+\cmidrule{1-14}
+\rowcolor{white}
+  \multirow{ 2}{*}{UD}  & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\
+\cmidrule{2-14}
+    & 2 & 0 & 3 & 1 & 2 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 8 \\
+\cmidrule{1-14}
+ \rowcolor{white}
+   IR & 0 & 3 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 5 \\
+\midrule
+
+\rowcolor{white}
+\multicolumn{13}{c}{\bf Database Design Problems}\\
+\midrule
+\rowcolor{white}
+  \multirow{ 2}{*}{MF}   & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 3 \\
+\cmidrule{2-14}
+   & 0 & 2 & 0 & 0 & 2 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 5 \\
+\cmidrule{1-14}
+\rowcolor{white}
+   \multirow{ 2}{*}{MI}   & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 2 & 0 & 3 \\
+\cmidrule{2-14}
+   & 3 & 1 & 4 & 6 & 3 & 0 & 0 & 3 & 5 & 1 & 1 & 3 & 30 \\
+\midrule
+\rowcolor{white}
+\multicolumn{13}{c}{\bf Application Design Tradeoffs}\\
+\midrule
+\rowcolor{white}
+ \multirow{ 2}{*}{DT}   & 1 & 0 & 0 & 2 & 0 & 2 & 6 & 10 & 0 & 1 & 0 & 0 & 22 \\
+\cmidrule{2-14}
+  & 5 & 1 & 1 & 0 & 0 & 1 & 0 & 3 & 1 & 0 & 0 & 2 & 14 \\
+ \cmidrule{1-14}
+\rowcolor{white}
+  \multirow{ 2}{*}{FT}   & 0 & 2 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 2 \\
+ \cmidrule{2-14}
+  & 3 & 2 & 4 & 0 & 1 & 0 & 2 & 1 & 2 & 1 & 1 & 2 & 19 \\
+ \midrule
+ 
+
+\rowcolor{white}
+Sum  & 18 & 17 & 24 & 25 & 31 & 7 & 8 & 27 & 17 & 11 & 10 & 9 & 204\\
+\bottomrule
+\end{tabular}
+\\
+\footnotesize{Data with white background shows 64 issues from 40 problematic actions\\ Data with gray background shows 140 issues from 12 bug-tracking systems\\
+\begin{tabular}{rlrl}
+IC:& Inefficient Computation & MF:& Missing Fields \\
+UC:& Unnecessary Computation & MI:& Missing Indexes \\
+ID:& Inefficient Data Accessing & DT:& Content Display Trade-offs\\
+UD:& Unnecessary Data Retrieval & FT:& Functionality Trade-offs\\
+IR:& Inefficient Rendering & \\
+
+\end{tabular}
+}
+
+\vspace{-0.10in}
+\end{table}

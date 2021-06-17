@@ -1,0 +1,134 @@
+\section{Discussion}
+\label{sec:dis}
+
+%Earlier sections have discussed various performance anti-patterns that widely exist in ORM applications, and also discussed what problems need future research to look at. In the section, we summarize some common themes for future research.
+
+In this section, we summarize the lessons learned and highlight the new research opportunities that are opened up by our study.
+
+%\vspace{-0.05in}
+\vspace{-0.09in}
+\paragraph{\bf{Improving ORM APIs}}Our study shows that many misused APIs have confusing names, as listed in Table \ref{tab:badapi}, but are translated to different queries and have very different performance. 
+%As another example, the {\tt first} query API orders tuples by primary key which is not reflected by the function name and is usually unnecessary.
+Renaming some of these APIs could help alleviate the problem.
+Adding new APIs can also help developers write well-performing code
+without hurting code readability. 
+For example, if Rails provides native API support for taking union of 
+two queries' results like Django \cite{django} does, there will be
+fewer cases of inefficient computation, such as those discussed in Section~\ref{sec:inefficomp}.
+%inefficient {\tt pluck(:id)+pluck(:id)} problems.
+As another example, better rendering API supports could help eliminate inefficient partial render problem discussed in 
+Section~\ref{sec:iffirender}.
+%; it applies to the \alvin{?}
+To our best knowledge, no ORM framework provides this type of rendering support.
+%This also applies to utilizing the database query log and query plan to improving database design like adding missed index.
+%\cong{I change the example. bulk create/delete is not a problem in Django.}
+%This also applies to the inefficient data accessing problem discussed
+%in Section~\ref{sec:iffidata}, where the lack of bulk record creation/deletion/update APIs in Rails inevitably encourages 
+%performance problems. New APIs would help eliminate
+%such inefficiency \shan{how does other ORM do on this?}. \alvin{I have the same question.}
+
+%For instance, Gitlab uses
+%``EXPLAIN ANALYZE'' to check query plan and add index accordingly,
+%and such feature may be wanted by many developers since missing
+%index is a very common problem and does not have completely automatic
+%solution\shan{are we suggesting people all use gitlab tool?}. Another example feature is recursively deleting associate records
+%without issueing N+1 query, which is not supported by current API\shan{don't understand. what does this mean?}.
+%A third example feature is building template for partial rendering\shan{what does this mean?}.
+%Adding an API to support template in extension to existing {\tt %render\_partial}
+%API can reduce much redundant computation in rendering similar records.
+%\cong{I'm not sure which example is better so I just list all of them here.}
+\vspace{-0.12in}
+\paragraph{\bf{Support for design and development of ORM applications}}
+Developers need help to better understand the performance of their code, especially the parts that involve ORM APIs.
+%ORM APIs and the potential cost of ORM code, because currently the time-consuming part of the application is all hidden by the ORM framework. 
+%They can no longer just focus on explicit loops in performance estimation.
+They should focus on not only loops but ORM library calls (e.g., joins) in performance estimation, since these calls often execute database queries and can be expensive in terms of performance.
+Building static analysis tools that can estimate performance 
+and scalability of ORM code snippets will alleviate some of the API misuses.
+More importantly, this can help developers design 
+better application functionality and interfaces, as discussed in Section~\ref{sec:appdesign}. 
+
+Developers will also benefit from tools that can aid in database design, such as suggesting 
+fields to make persistent, as discussed in Section~\ref{causes:db}.
+While prior work focuses on index design~\cite{autoadmin}, little has been done on aiding developers to determine which fields to make persistent.
+%In contrast to traditional database design tools that relies of query logs to infer application semantics~\cite{autoadmin}, 
+As the ORM application already contains information on how each object field is computed and used,
+%database field is updated and used to compute other properties, this 
+this provides a great opportunity for program analysis to further help in both aspects.
+%help with database schema design, suggesting which field to be stored persistently.
+%suggesting adding or deleting fields.
+%this... Traditional design tools also has query log as representative workload. 'query semantic' is in query and need not to infer?}
+
+%Our study indicates that it is possible to build such design-time support.
+%recommend the result may better be saved to database.
+
+%\shan{moved here from index}
+%Interesting, we notice that Gitlab developers already built a testing tool \cite{sherlock} targeting this problem. This tool leverages postgresql's 
+%\texttt{EXPLAIN ANALYZE} functionality to analyze all the query plans 
+%of queries issued during testing and see if a column is missing index.
+%The above solution is useful but requires
+%a large amount of profiling. Future research
+%can potentially build static checking tools that xxx.
+\vspace{-0.12in} 
+\paragraph{\bf{Compiler and runtime optimizations}}
+While some performance issues are related to developers' design decisions, we believe that others can be detected and fixed automatically. Previous work has already tackled 
+some of the issues such as pushing computation down to database through query synthesis \cite{cheung:pldi13}, query batching \cite{cheung:sigmod14:sloth, dbridge:tkde15}, and avoiding
+unnecessary data retrieval \cite{chen:se16:redundantData}. There are still many 
+automatic optimization opportunities that remain unstudied. This ranges from checking for API misuses, as we discussed in Section~\ref{sec:staticChecker}, to more sophisticated 
+database-aware optimization techniques to remove unnecessary computation (Section~\ref{sec:uncomp}) and inefficient queries (Section~\ref{sec:inefficomp}). 
+
+Besides static compiler optimizations, runtime optimizations or trace-based optimization for ORM frameworks are further possibilities for future research, such as automatic pagination
+for applications that render many records,
+runtime decisions to move computation between the server and the DBMS, 
+runtime decisions to switch between lazy and eager loading,
+and 
+%can be made whether to perform a computation in memory or to issue a database query, depending on whether the data is already loaded;
+runtime decisions about whether to %perform
+remove certain expensive functionalities as discussed in Section~\ref{sec:simplifyfeatures}.
+%\alvin{I don't get the last one} \cong{is 'remove' better?}
+Automated tracing and trace-analysis tools can help model workloads
+and workload changes, which can then be used to adapt database and application designs automatically.
+%missed foreign key index may be added
+%automatically when the system detects that such index will be frequently used if added.
+Such tools will need to understand the ORM framework and the interaction among the client, server, and DBMS.
+\vspace{-0.13in} 
+\paragraph{\bf{Generalizing to other ORM frameworks}}
+Our findings and lessons apply to other ORM frameworks as well. The database design (Section \ref{causes:db}) and application design trade-offs (Section \ref{sec:appdesign}) naturally apply across ORMs. Most of the API use problems (Section \ref{causes:api}), like unnecessary computation (UC), data accessing (ID, UD), and rendering (IR), are not limited to specific APIs and hence are general.
+While the API misuses listed in Table~\ref{tab:badapi}
+may appear to be Rails specific, 
+there are similar misuses in applications built upon Django ORM~\cite{django} as well: {\tt exists()} is more efficient than 
+\texttt{count>0} ({\footnotesize \circled{1}}); {\tt filter().get()} is faster than 
+\texttt{filter().first} ({\footnotesize \circled{2}}); {\tt clear}
+\texttt{\_ordering(True)} is like 
+\texttt{except(:order)} ({\footnotesize \circled{3}}); {\tt all.update} can batch updates ({\footnotesize \circled{4}}); 
+{\tt len()} is faster than {\tt count()} with loaded arrays ({\footnotesize \circled{5}});  
+ {\tt only()} is like {\tt pluck()}({\footnotesize \circled{6}}); 
+  {\tt aggregate}
+  {\tt (Sum)} is like {\tt sum} in Rails  ({\footnotesize \circled{7}}); 
+   {\tt union} allows two query results to be unioned in database ({\footnotesize \circled{8}}); 
+{\tt get\_or\_create} is like 
+{\tt find\_or\_create\_by} in Rails 
+({\footnotesize \circled{9}}). 
+We sampled 15 issue reports each from top 3 popular Django applications on GitHub. As shown below, these 45 performance issues fall into the same 8 anti-patterns our \numissues Rails issue reports fall into: 
+%Furthermore, for {\bf every} anti-pattern observed in Rails issue reports, we also observed it in issue reports from top 3 popular Django applications on GitHub \cite{redash,zulip,django-cms}:
+%IC \cite{zulip3629}, UC \cite{cms4461}, ID \cite{cms1117}, UD \cite{zulip375}, MF \cite{cms912}, MI \cite{zulip5214}, DT \cite{redash625}, FT \cite{redash300} (many more Django examples skipped for space).
+
+\begin{table}[h]
+\centering
+\footnotesize
+%\caption{Number of problematic actions in each application}
+\begin{tabular}{@{\hspace{0.1in}}l@{\hspace{0.1in}}l@{\hspace{0.1in}}l@{\hspace{0.1in}}l@{\hspace{0.1in}}l@{\hspace{0.1in}}l@{\hspace{0.1in}}l@{\hspace{0.1in}}l@{\hspace{0.1in}}l@{\hspace{0.1in}}}
+\toprule
+       & IC& UC& ID& UD& MF& MI& DT & FT\\
+\midrule
+Redash \cite{redash} 		& 2 & 3 & 6 & 0 & 0 & 0 & 2 & 2\\
+Zulip \cite{zulip}  		& 2 & 5 & 2 & 1 & 0 & 2 & 1 & 2 \\
+Django-CMS \cite{django-cms}& 0 & 9 & 3 & 0 & 1 & 0 & 1 & 1 \\
+ \bottomrule
+\end{tabular}
+\end{table}
+
+
+%TODO Out of Space
+%\paragraph{\textbf{Readability vs. Efficiency}} Developers' initial reaction to the patch in Figure \ref{fig:tracks63} is that it hurts code readability. Patches to xxx actually introduce message-chain code smell. some redundant computation may be caused by fear of hurting code modularity. count vs size patch may not be optimal given the code modularity. \shan{why some problems exist in old version and still appear in latest version? }
+

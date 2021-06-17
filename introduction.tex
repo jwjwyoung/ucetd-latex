@@ -1,0 +1,88 @@
+\section{Introduction}
+\label{sec:intro}
+
+
+%Data-related performance and scalability problems; 
+
+Modern web applications face the challenge of processing a growing amount of data while serving increasingly impatient users. On one hand, popular web applications typically increase their user bases by 5--7\% per week in the first few years~\cite{startup}, with quickly growing data that is produced or consumed by these users and is managed by applications. 
+%\alvin{does growing number of users always imply mean growing data size? I don't think so. Take news website for instance. Does more viewers mean more news??} \junwen{except for user, we can also show the data for the posts growth for facebook and other applications: Every 60 seconds on Facebook, 510,000 comments are posted, 293,000 statuses are updated, and 136,000 photos are uploaded.\cite{facebook:2}}
+%Twitter\cite{twitter} has shown that their monthly active users worldwide have increased from 30 million to 328 million during 2010 to 2017.
+On the other hand, studies have shown that nearly half of the users expect a site to load in less than 2 seconds and will abandon a site if it is not loaded within 3 seconds \cite{akamai2011}, while every extra 0.5 second of latency reduces the overall traffic by 20\% \cite{google.2006}.
+
+% ORM 
+%\alvin{I suggest add a paragraph here to first briefly describe how database-backed web apps are constructed. This will also be a good time to introduce ORMs, and then say developing apps that are efficient requires cross stack understanding}
+
+To manage large amounts of data, modern web applications often follow a two-stack architecture, with a front-end application stack fulfilling application semantics and a back-end database management system (DBMS) storing persistent data and processing data retrieval requests.
+To help developers %who are mostly not database experts 
+construct such database-backed web applications, Object Relational Mapping (ORM) frameworks have become increasingly popular, with implementations in all common general-purpose languages: 
+the Ruby on Rails framework (Rails) for Ruby \cite{ror}, Django for Python \cite{django}, and Hibernate for Java \cite{hibernate}. These ORM frameworks allow developers to program such database-backed web applications in a DBMS oblivious way, as the frameworks expose APIs for developers to operate persistent data stored in the DBMS as if they are regular heap objects, with regular-looking method calls transparently translated to SQL queries by frameworks when executed.
+
+Unfortunately, ORM frameworks inevitably bring concerns to the performance and scalability of web applications, whose multi-stack nature demands cross-stack performance understanding and optimization. %skills regarding not only front-end application semantics but also back-end data processing engines. 
+On one hand, it is difficult for application compilers or developers to optimize the interaction between the application and the underlying DBMS, as they are unaware of how their code would translate to queries by the ORM. On the other hand, ORM framework and the underlying DBMS are unaware of the high-level application semantics and hence cannot generate efficient plans to execute queries.
+% inefficient or unscalable code cannot easily get exposed and hence many of them escape to production runs
+Making things even worse, data-related performance and scalability problems are particularly difficult to expose during in-house testing, as they might only occur with large amounts of data that only arises after the application is deployed.
+%where the large amount of data a web application may encounter in the field is often unaccessible and can be easily underestimated.
+
+%Server-side problems
+
+%\junwen{feel difficult to address the server side problems}
+
+%\shan{Here, you can say something like, unlike the performance problems at the client side, which has been thoroughly studied -- cite Michael Pradel and other papers here, the server side problem is important and yet understudied -- somewhere in the introduction you should cite previous ICSE/FSE from Canada that discusses ORM problems.}
+
+%To help developers tackle this challenge \alvin{what challenge?}, a good understanding of common performance and scalability problems in real-world ORM applications is crucial. 
+
+Unlike performance problems on the client side, which have been well studied in prior work~\cite{mark:se17:javascript, bag:microsoft2008},
+%\alvin{also consider this work: https://www.microsoft.com/en-us/research/project/doloto/},
+the cross-stack performance problems on the server side are under-studied, which unfortunately are the key to the data-processing efficiency of ORM applications. 
+Although recent work~\cite{chen:se14:antipattern, chen:se16:redundantData, cheung:pldi13, yan:cikm17} has looked at specific performance problems in ORM applications, 
+%such as redundant data column retrieval and under-use of SQL queries, by studying a couple of Java Hibernate applications, 
+there has been no comprehensive study to understand the performance and scalability of real-world ORM applications, the variety of performance issues that prevail, and how such issues are addressed.
+% what are the variety of performance problems that commonly exist in these applications historically and currently, and how real-world ORM developers have been struggling at or handling performance problems.
+ 
+Given the above, we target three key research questions about real-world ORM applications in this paper:
+
+\begin{itemize}
+\item {\bf RQ 1}: How well do real-world database-backed web applications perform as the amount of application data increases?
+\item {\bf RQ 2}: What are the common root causes of performance and scalability issues in such applications?
+%are they related to data processing?
+\item {\bf RQ 3}: What are the potential solutions to such issues and can they be applied automatically?
+\end{itemize}
+
+To answer these questions, we conduct a comprehensive two-pronged empirical study on a set of 12 Rails applications representing 6 common categories that exercise a wide range of functionalities provided by the ORM framework and DBMS. We choose Rails as it is a popular ORM framework \cite{hotframework}.
+%which will be discussed in detail in Section \ref{sec:methodology}. 
+%
+%(i.e., forum, collaboration, e-commerce, task management, social network, and map\footnote{The categories is chosen from \cite{category}, most ORM apps falls in the 6 categories we choose.
+%
+%\shan{I forgot to ask you --- why did you pick these 6 categories?}
+%\cong{One reference for categorization I found online is https://en.wikipedia.org/wiki/Category:Web\_applications. My feeling is that most ORM apps falls in the five categories in the left column. If needed I can count the exact number (maybe for top 200 open source Rails/ORM apps)}
+%}). \alvin{I think we should keep this short and justify why these categories were picked in 3.1 instead}
+%
+%After identifying these applications, we first thoroughly profile each application to not only understand but also alleviate performance and scalability problems of the selected applications.%, which are top-2 most popular applications from GitHub for each of the 6 categories above. \alvin{why mention top-2 .. here? Shouldn't that be part of the justification in 3.1?}
+%
+We carefully examine \numissues fixed performance issues randomly sampled from the bug-tracking systems of these 12 applications. This helps us understand how well these applications performed on real-world data \textit{in the past}, and what types of performance and scalability problems have been discovered and fixed by end-users and developers in \textit{past versions}.
+
+To complement the above study, we also conduct thorough profiling and code review of the latest versions of these 12 applications. This investigation helps us understand how these applications \textit{currently} perform on our carefully synthesized data (to be explained in Section \ref{sec:methodology}),  what types of performance and scalability problems still exist in the \textit{latest versions}, and how they can be fixed.
+
+In terms of findings,
+for {\bf RQ1}, our profiling in Section \ref{sec:profiling} shows that, under workload that is no larger than today's typical 
+workload, 11 out of 12 studied applications contain pages in their latest versions that take more than two seconds to load and also pages that scale super-linearly. Compared to client-side computation (e.g., executing JavaScript functions in the browser), server-side computation takes more time in most time-consuming pages and often scales much worse. 
+These results motivate research to tackle server-side performance problems in ORM applications.
+
+For {\bf RQ2}, we generalize 9 ORM performance anti-patterns by thoroughly studying about 200 real-world performance issues, with \numissues collected from 12 bug-tracking systems and \numacissues manually identified by us based on profiling the same set of ORM applications (Section \ref{sec:causes}).  We group these 9 patterns into three major categories---ORM API misuses, database design problems, and trade-offs in application design.
+All but one of these patterns exist both in previous versions (i.e., fixed and recorded in bug-tracking systems) and the latest versions (i.e., discovered by us through profiling and code review) of these applications.
+6 of these anti-patterns appear profusely in more than half of the studied applications. While a few of them have been identified in prior work, the majority of these anti-patterns have \textit{not} been researched in the past.
+
+Finally, for {\bf RQ3}, we manually design and apply fixes to the \numacissues performance issues in the latest versions of these 12 ORM applications (Section \ref{sec:opt}). Our fixes achieve 2$\times$ median speedup (and up to \maxspeedup$\times$) in server-side performance improvement, and reduce the average end-to-end latency of 39 problematic web pages in 12 applications from \eoebefore seconds to \eoeafter seconds, making them interactive.
+Most of these optimizations follow generic patterns that we believe can be automated in the future through static analysis and code transformations. As a proof of concept, we implement a simple static checker based on our findings and use it to find hundreds of API misuse performance problems in the latest versions of these applications (Section~\ref{sec:staticChecker}).
+
+Overall, our comprehensive study provides motivations and guidelines for future research to help avoid, detect, and fix cross-stack performance issues in ORM applications. 
+%This study is just a beginning. In the long run, 
+\textcolor{black}{
+%This study belongs to our long term project, Hyperloop~\cite{website}, which aims to solve performance problems for ORM applications.  %It contains PowerStation~\cite{powerstation}, an IDE plugin to automatically identify some of the common performance issues we discovered in the study\shan{Why do we mention this here? We only plan to make things already published available to public, right? Did I miss something?}. 
+%PowerStation performs static analysis on the application's source code, highlights the fragments that might lead to performance problems, and suggests fixes if possible. 
+We have prepared a detailed replication package for all the performance-issue study, profiling, and program analysis conducted in this paper. This package is available
+on the webpage of our Hyperloop project \cite{website}, a project
+that aims to solve database-related performance problems in ORM applications.} %And we are going to conduct more studies and develop more tools in the future.  
+%\junwen{This study plays an important role in our Hyperloop\cite{website} project, which aims to improve the performance of ORM applications./ Furthermore, based on this comprehensive study and our previous work \cite{yan:cikm17}, we built Hyperloop\citep{website}, a project aims to improve the performance of applications built on ORM frameworks. More tools aiming to conduct static analysis or code transformations based on our found anti-patterns will be included in Hyperloop in the future. Also, in Hyperloop, you can find our profiling workload, as well as the static checker and other experimental materials.}
+
+%In the following, we present the methodology of our study in Section~\ref{sec:methodology} and the profiling results in~\secref{presult}. Root causes and potential solutions of performance and scalability issues are discussed in~\secref{causes} and~\secref{opt}, followed by related work discussion in~\secref{related} and conclusions in \secref{conc}.

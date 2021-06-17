@@ -1,0 +1,198 @@
+% ---- ETD Document Class and Useful Packages ---- %
+\documentclass{ucetd}
+\usepackage{subfigure,epsfig,amsfonts}
+\usepackage{natbib}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+\usepackage{booktabs} % For formal tables
+\usepackage{verbatim}
+\usepackage{soul}
+\usepackage{color,calc}
+\PassOptionsToPackage{bookmarks=false}{hyperref}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{comment}
+\usepackage{xspace}
+\usepackage{tikz}
+\usepackage{color, colortbl}
+\usepackage{flushend}
+\usepackage{multirow}
+
+\usepackage[disabled]{aplcomments}
+\newcommenter{shan}{1.0,0.0,0.0}
+\newcommenter{junwen}{0.0,1.0,0.0}
+\newcommenter{cong}{0.0,0.8,0.8}
+\newcommenter{alvin}{0.0,1.0,1.0}
+
+\newcommand{\numissues}{140\xspace}
+\newcommand{\numacissues}{64\xspace}
+\newcommand{\numpactions}{40\xspace}
+\newcommand{\numconfirmedapi}{53\xspace}
+\newcommand{\numfixedapi}{29\xspace}
+\newcommand{\numconfirmedpaissues}{14\xspace}
+\newcommand{\numfixedpaissues}{7\xspace}
+
+\newcommand{\maxspeedup}{39\xspace}
+
+\newcommand{\eoebefore}{4.17\xspace}
+\newcommand{\eoeafter}{0.69\xspace}
+\newcommand{\serverbefore}{3.57\xspace}
+\newcommand{\serverafter}{0.49\xspace}
+% \usepackage{graphicx,subcaption}
+% for pw
+\newcommand{\categoryNum}{6}
+\newcommand{\Tool}{PowerStation\xspace}
+\newcommand{\issueNum}{1221\xspace}
+\newcommand{\fixedIssueNum}{730\xspace}
+\newcommand{\confirmedIssue}{57\xspace}
+\newcommand{\reportedIssue}{433\xspace}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+
+\newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
+
+%panorama
+
+
+\newcommand{\ToolP}{Panorama\xspace}
+\newcommand{\seclabel}[1]{\label{s:#1}}
+\newcommand{\lstlabel}[1]{\label{lst:#1}}
+\newcommand{\figlabel}[1]{\label{f:#1}}
+
+\newcommand{\tabref}[1]{Table~\ref{table:#1}}
+\newcommand{\figref}[1]{Figure~\ref{fig:#1}}
+\newcommand{\secref}[1]{Section~\ref{sec:#1}}
+\newcommand{\secrefs}[2]{Sections~\ref{sec:#1}-\ref{sec:#2}}
+\newcommand{\ssecref}[1]{Sec.~\ref{sec:#1}}
+\newcommand{\appref}[1]{Appendix~\ref{sec:#1}}
+\newcommand{\algref}[1]{Algorithm~\ref{alg:#1}}
+\newcommand{\listref}[1]{Listing~\ref{list:#1}}
+
+
+\newcommand{\numissuestwo}{149\xspace}
+\newcommand{\eoespeedup}{4.5$\times$\xspace}
+
+\newcommand{\maxspeeduptwo}{38$\times$\xspace}
+
+% constraints
+
+\newcommand{\numissuescon}{114\xspace}
+\newcommand{\numreportedissues}{56\xspace}
+\newcommand{\numconfirmedissues}{49\xspace}
+\newcommand{\numunconfirmedissues}{7\xspace}
+\newcommand{\nummergedissues}{23\xspace}
+
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{xspace}
+\usepackage{spreadtab}
+\usepackage{colortbl}
+% \usepackage{hyperref}
+\lstloadlanguages{Ruby}
+\lstset{%
+basicstyle=\small\ttfamily\color{black},
+commentstyle = \ttfamily\color{blue},
+keywordstyle=\ttfamily\color{blue},
+stringstyle=\color{orange}}
+\lstset{emph={scope, includes, User, family, @comment, comments, user, people, real_comments, rename_column, Comment},emphstyle={\color{red}}
+}
+
+
+\newcommand{\ETool}{EvolutionSaver\xspace}
+\newcommand{\numRailsApp}{6\xspace}
+\newcommand{\numDjangoApp}{6\xspace}
+\newcommand{\numRailsError}{86\xspace}
+
+\newcommand{\numFixed}{75\xspace}
+\newcommand{\numRailsWarning}{25\xspace}
+\newcommand{\numfixedafterrelease}{30\xspace}
+
+\newcommand{\developerfixed}{91\xspace}
+\usepackage{subfig} 
+\usepackage{caption}
+
+\usepackage{subcaption}
+\captionsetup[sub]{labelformat=simple}
+\renewcommand\thesubfigure{(\alph{subfigure})}
+%% Use these commands to set biographic information for the title page:
+\title{Improving performance and correctness of \\ database-backed web applications}
+\author{Junwen Yang}
+\department{Computer Science}
+\division{Physical Science}
+\degree{Philosophy of Doctor}
+\date{}
+
+%% Use these commands to set a dedication and epigraph text
+\dedication{}
+\epigraph{}
+
+
+\begin{document}
+%% Basic setup commands
+% If you don't want a title page comment out the next line and uncomment the line after it:
+\maketitle
+%\omittitle
+
+% These lines can be commented out to disable the copyright/dedication/epigraph pages
+\makecopyright
+\makededication
+\makeepigraph
+
+
+%% Make the various tables of contents
+\tableofcontents
+\listoffigures
+\listoftables
+
+\acknowledgments
+%\makebibliography
+
+% Enter Acknowledgements here
+
+\abstract
+% Enter Abstract here
+\input{abstract}
+\mainmatter
+% Main body of text follows
+
+\chapter{Introduction}
+
+
+\input{base-introduction}
+% Introductory stuff
+
+\chapter{A comprehensive study of performance issues in database-backed web applications}
+\input{hownotto/hownotto}
+
+
+\chapter{PowerStation: Detecting and Fixing Performance Inefficiencies}
+\input{powerstation/pw-main}
+
+\chapter{Panorama: View-Centric Performance Optimization}
+\input{panorama/main}
+\chapter{Managing data constraints in database-backed web applications}
+\input{constraints/constraint-main}
+
+\chapter{Automated Code Refactoring upon Database-Schema Changes in Web Applications}
+\input{evolutionsaver/evo-main}
+
+
+\chapter{Related Work}
+\input{hownotto/related}
+\input{con-related}
+
+\chapter{Future Work}
+\input{future}
+% Intro to chapter one
+% Format a LaTeX bibliography
+
+% Figures and tables, if you decide to leave them to the end
+%\input{figure}
+%\input{table}
+\bibliography{master}
+\bibliographystyle{plain}
+\end{document}
+
+

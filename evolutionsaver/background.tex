@@ -1,0 +1,24 @@
+\section{Background and Extended Motivation}
+\label{sec:back}
+
+\textbf{Background.} 
+%ORM frameworks offer a \textit{migration} mechanism to consistently alter the database schema over time. 
+A web application's schema gets initialized and 
+updated by \textit{migration APIs} in migration 
+files, a mechanism supported by ORM frameworks. 
+For example, Listing \ref{migration} illustrates
+two migration files, each with one migration API
+call: the first creates a table named \texttt{people} with two columns \texttt{id} and \texttt{sequence},
+which are automatically mapped to two fields in a corresponding model class
+with a singular name
+(\texttt{Person} class); the second 
+renames a table column, which automatically causes
+a field name change in its model class. 
+
+During an installation/upgrade of a 
+web application, the ORM framework executes all the
+latest migration files not yet executed
+on this installation, calling migration APIs in these files one by one and updating the schema along the way.
+%; an existing installation will only execute the latest migration entry upon its software upgrade.
+
+%\lstinputlisting[basicstyle=\footnotesize\ttfamily, label={migration}, caption={Inconsistent code from Onebody},language=Ruby]{migration.rb}

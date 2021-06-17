@@ -1,0 +1,34 @@
+\begin{table}[t]
+\caption{Schema Changes Handled by \Tool}
+\label{tab:overview}
+\centering
+%\resizebox{\columnwidth}{!}{
+\begin{tabular}{lll}
+\arrayrulecolor{black}\hline  
+\arrayrulecolor{black}\hline
+Changes & Change Target &  \Tool{} Output\\
+\arrayrulecolor{gray} \hline
+\multirow{3}{*}{Name Change}   & Table & \multirow{3}{*}{Refactoring suggestion}  \\
+\arrayrulecolor{gray} \cline{2-2}
+ & Column  &  \\
+ \arrayrulecolor{gray} \cline{2-2}
+  & Association  &  \\
+\arrayrulecolor{gray} \hline
+\multirow{4}{*}{Deletion}   & Table &  Inconsistency error reports \\
+\arrayrulecolor{gray} \cline{2-3}
+ & Column  &  \multirow{2}{*}{Refactoring suggestion}\\
+ \arrayrulecolor{gray} \cline{2-2}
+  & Association  &  \\
+\arrayrulecolor{gray} \cline{2-3}
+  & Index  & Inconsistency warning \\
+\arrayrulecolor{gray} \hline
+\multirow{2}{*}{Type Change}   & Column & Inconsistency warning  \\
+\arrayrulecolor{gray} \cline{2-3}
+  & Association  & Partial refactoring suggestion\\
+\arrayrulecolor{gray} \hline
+\arrayrulecolor{black}\hline  
+\arrayrulecolor{black}\hline
+\end{tabular}
+
+%}
+\end{table}

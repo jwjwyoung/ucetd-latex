@@ -1,0 +1,45 @@
+\begin{table}[]
+\centering
+\caption{Data-constraint issues in real-world apps}
+\label{tab:issuecat}
+\setlength{\tabcolsep}{4pt}  
+\resizebox{0.6\columnwidth}{!}{
+% \begin{tabular}{lrrrrrr}
+% \toprule 
+% & WHERE
+% &  \multicolumn{2}{c}{WHAT}   & WHEN  & HOW & SUM  \\ 
+% \cmidrule{3-4}
+% & 
+% &  vs. code  & vs. user  &   &  &   \\ 
+% \midrule
+% Ds  & 3  & 0  & 6  & 2  & 2  & 13  \\ \midrule
+% Lo  & 0  & 1  & 0  & 0  & 0  & 1   \\ \midrule
+% Gi  & 3  & 8  & 0  & 4  & 1  & 16  \\ \midrule
+% Re  & 7  & 11 & 4  & 1  & 7  & 30  \\ \midrule
+% Sp  & 8  & 14 & 3  & 3  & 3  & 31  \\ \midrule
+% Ro  & 0  & 1  & 1  & 0  & 0  & 2   \\ \midrule
+% Fu  & 1  & 0  & 0  & 0  & 0  & 1   \\ \midrule
+% Tr  & 0  & 0  & 1  & 1  & 0  & 2   \\ \midrule
+% Da  & 0  & 4  & 1  & 1  & 5  & 11  \\ \midrule
+% On  & 2  & 2  & 1  & 0  & 0  & 5   \\ \midrule
+% FF  & 0  & 0  & 0  & 0  & 0  & 0   \\ \midrule
+% OSM & 0  & 0  & 0  & 0  & 2  & 2   \\ \midrule
+% SUM & 24 & 41 & 17 & 12 & 20 & 114 \\ \bottomrule
+% \end{tabular}
+
+\begin{tabular}{@{}rrrrrrrrrrrrrrr@{}}
+\toprule
+                      &          & Ds & Lo & Gi & Re & Sp & Ro & Fu & Tr & Da & On & FF & OSM & SUM \\ \midrule
+WHERE                 &          & 3  & 0  & 3  & 7  & 8  & 0  & 1  & 0  & 0  & 2  & 0  & 0   & 24  \\ \midrule
+\multirow{2}{*}{WHAT} & vs. code & 0  & 1  & 8  & 11 & 14 & 1  & 0  & 0  & 4  & 2  & 0  & 0   & 41  \\ \cmidrule(l){2-15} 
+                      & vs. user & 6  & 0  & 0  & 4  & 3  & 1  & 0  & 1  & 1  & 1  & 0  & 0   & 17  \\ \midrule
+WHEN                  &          & 3  & 0  & 4  & 1  & 3  & 0  & 0  & 0  & 1  & 0  & 0  & 0   & 12  \\ \midrule
+HOW                   &          & 2  & 0  & 1  & 7  & 3  & 0  & 0  & 0  & 5  & 0  & 0  & 2   & 20  \\ \midrule
+SUM                   &          & 14 & 1  & 16 & 30 & 31 & 2  & 1  & 1  & 11 & 5  & 0  & 2   & 114 \\ 
+
+
+\bottomrule
+\end{tabular}
+}
+\footnotesize{}
+\end{table}

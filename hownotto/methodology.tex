@@ -1,0 +1,140 @@
+\input{hownotto/app_detail_table}
+
+\section{Profiling \& Study Methodology}
+\label{sec:methodology}
+
+This section explains how we profile ORM applications and study their bug-tracking systems, with the goal to understand how they perform and scale in both their latest and previous versions.
+
+\subsection{Application Selection}
+
+%explain our decision to choose RoR
+As mentioned in Section \ref{sec:overview}, we focus on Rails applications.
+%, one of the most popular web application frameworks.
+%\shan{a silly question: are there Ruby applications that do not use ORM?} \alvin{Yes. Ruby is a general purpose programming language. Like Hibernate is one of Java's ORM and there are many other Java non Hibernate apps.}
+%\shan{TODO: some reviewers may think that Rails language is for quick prototype and hence performance doesn't matter much...}
+%\cong{There are many many websites talking about Rails performance issues and suggestions for developers how to avoid that. We may show some data here?}
+%explain our decision to choose the 6 categories
+Since it is impractical to study all open-source Rails applications (about 200 thousand of them on GitHub~\cite{github}), we focus on 6 popular application categories\footnote{\textcolor{black}{We use the category information as provided by the application developers. For example, Diaspora is explicitly labeled  `social-network' \cite{diaspora}.}}
+%on {\tt https://github.com/diaspora/diaspora}. }} 
+as shown in Table~\ref{tab:apps}. \textcolor{black}{These 6 categories cover 90\% of all Rails applications with more than 100 stars on GitHub.  They also cover a variety of database-usage characteristics, such as transaction-heavy (e.g., e-commerce), read-intensive (e.g., social networking), and 
+write-intensive (e.g., forums). Furthermore, %They also cover
+ they cover both graphical interfaces (e.g., maps) and traditional text-based interfaces (e.g., forums).}
+
+%\shan{junwen: sorry, maybe I deleted your explanation of how you know which applications belong to which category? can you explain it? are there popularity ranking among categories/labels?}
+%explain our decision to choose the 12 applications
+We study the top 2 most popular applications in each category, based on the number of ``stars'' on GitHub. These 12 applications shown in Table~\ref{tab:apps}
+have been developed for 5 to 12 years. They are all in active use and range from 7K lines of code (Lobsters~\cite{lobsters}) to 
+145K lines of code (Gitlab~\cite{gitlab}).
+
+
+
+
+\subsection{Profiling Methodology}
+\label{sec:meth_profile}
+
+\paragraph{\bf Populating databases}
+To profile an ORM application, we need to populate its database. Without access to the database contents in the deployed applications, we collect real-world statistics of each application based on its public website (e.g., 
+{\tt https://gitlab.com/explore} for Gitlab~\cite{gitlab}) or similar application's website (e.g., amazon~\cite{amazon} statistics for e-commerce type applications). 
+We then synthesize database contents based on these statistics along with application-specific constraints.
+Specifically, we implement a crawler that fills out forms on the application webpages hosted on our profiling servers with data automatically generated based on the data type constraints. Our crawler carefully controls how many times each form is filled following the real-world statistics collected above.
+
+Take Gitlab as an example, an application that allows user to manage projects and git repositories. We run a crawler on our own Gitlab installation. Under each generated user account, the crawler first randomly decides how many projects this user should own based on the real-world statistics collected from {\tt https://gitlab.com/explore} shown in Table~\ref{distribution}, say $N$, and then fills the create project page $N$ times. The crawler continues to create new project commits, branches, tags, and others artifacts in this manner.
+
+\input{hownotto/gitlab_table}
+
+Other applications are populated similarly, and we skip the details due to space constraints. \textcolor{black}{Virtual-machine images that contain all these applications and our synthetic database content, as well as data-populating scripts, are available at our project website~\cite{website}.} 
+%Our synthetic data can be downloaded at \cite{data}. 
+%The scripts generating the database contents are at \citep{scriptsSynData}
+%\junwen{We provide docker images which host applications with our synthetic data, as well as corresponding data-populating scripts~\cite{website}. }
+%We do our best effort to ensure that the populated databases resemble real-world workloads for each application, and we skip the details here for space constraints. We plan to release our databases to public.
+
+
+
+
+\input{hownotto/dbsize_table}
+
+\vspace{-0.08in} 
+\paragraph{\bf Scaling input data}
+We synthesize three sets of database contents for each application that contain $200$, $2000$, and $20,000$ records in its main database table, which is the one used in rendering homepage, such as the \texttt{projects} table for Gitlab and Redmine, 
+the \texttt{posts} table 
+for social network applications, etc. 
+Other tables' sizes scale up accordingly following the data distribution statistics discussed above. The total database sizes (in MB) under these three settings are shown in Table~\ref{tab:dbsize}.
+
+%\alvin{I still don't get why we need to distinguish 'main' and 'not main' tables?}
+When we discuss an application's {\it scalability}, we compare its performance among the above three settings. 
+When we discuss an application's {\it performance}, we focus on the $20,000$-record setting, which is a {\em realistic} setting for all the applications under study. In fact, based on the statistics we collect, the number of main table records of every application under study is usually larger than $20,000$ in public deployments of the applications. For example, Lobsters and Tracks' main tables hold the fewest records, $25,000$ and $26,000$, respectively. Many applications contain more than $1$ million records in their main tables --- Spree's official website contains almost $500$ million products, Fallingfruit's official website contains more than $1$ million locations on map, etc.
+%, as shown in Table \ref{realworkload}.
+
+%\input{realistic_workload_table}
+
+%\alvin{where does this data come from?}
+%\shan{TODO: we should report the size of the database, in addition to the \# of records, because a lot of database operations depend on the size not the \#records}
+
+
+
+%\junwen{the size of tracks, and spree still needs other data, especially for tracks since there is not many similar apps like tracks to collect data}
+
+
+\vspace{-0.08in} 
+\paragraph{\bf Identifying problematic actions}
+Next, we profile applications to identify actions with potential performance problems. We deploy an application's latest version under Rails production mode on AWS m4.xlarge instance \cite{aws} with populated databases. We run a Chrome-based crawler~\cite{browser} on another AWS instance
+%\shan{is the crawler running on your local machine or also on Amazon?}
+to visit links repeatedly and randomly for 2 hours to collect performance profiles for every action in an application.\footnote{The database size will increase a little bit during profiling as some pages contain forms, but the overall increase is negligible and does not affect our scalability comparison.} We repeat this for all three sets of databases shown in Table~\ref{tab:dbsize}, \textcolor{black}{ and each set is repeated for 3 times.}
+We then process the log produced by both Chrome and the 
+Rails Active Support Instrumentation API~\cite{activesupport} to
+obtain the average end-to-end loading time for every page, the detailed performance breakdown, as well as issued database queries.
+
+%\cong{'randomly access application for 2 hours' is not a normal user behavior. Besides, 'random crawler' is not defined. We can say either 'simulating xxx (large number) users visiting the webpage in 30 minutes', or 'simulating xxx (large number) user sessions, with each session visiting x pages (the data can be found at http://www.alexa.com/siteinfo)}
+%\alvin{I don't get this. I thought this 2 hour crawl is part of data generation? Why does this become the way to identify problematic actions?}
+
+For each application, we firstly identify the top 10 most time-consuming controller actions, among which we further classify an action $A$ as {\em problematic} if it either  
+spends more than one second on the server side, meaning that the corresponding end-to-end loading time would likely approach two seconds,  making it undesirable for most users~\cite{akamai2011}; or
+its performance grows super-linearly as the database size increases from $200$ to $2,000$ and then to $20,000$ records.
+The identified actions are the target of our study on performance and scalability problems as we describe in Section \ref{sec:causes}
+and \ref{sec:opt}.
+
+
+\subsection{Report-Study Methodology}
+To complement the above profiling that examines the latest version of an application using our synthetic datasets, we also study the performance issues
+%, randomly sampled from application bug trackers/forums, 
+%\cong{'randomly sampled' sounds inconvincing, and how do you sample?Shall we count the total number of performance-related issues?}
+reported by users based on real-world workloads and fixed by developers for past versions of these ORM applications, so that we can understand how well these deployed applications performed in the past.
+
+\begin{table}
+\begin{center}
+    
+\caption{Numbers of sampled and total issue reports}
+\footnotesize
+\begin{tabular}{@{\hspace{0.1in}}r@{\hspace{0.1in}}r@{\hspace{0.1in}}r@{\hspace{0.1in}}r@{\hspace{0.1in}}r@{\hspace{0.1in}}r@{\hspace{0.1in}}r@{\hspace{0.1in}}r@{\hspace{0.1in}}r@{\hspace{0.1in}}r@{\hspace{0.1in}}r@{\hspace{0.1in}}r@{\hspace{0.1in}}}
+\toprule
+ Ds & Lo & Gi & Re & Sp & Ro & Fu & Tr & Da & On & FF & OS\\
+\midrule
+17 & 7 & 22 & 22 & 28 & 2 & 2 & 12 & 13 & 5 & 3 & 7\\
+\midrule
+4607 & 220 & 18038 & 12117 & 4805 & 114 &158 &1470 &3206 & 400 & 17 & 650\\
+\bottomrule
+\end{tabular}
+
+\end{center}
+\label{tab:issueapp}
+{\footnotesize The upper row shows the number of reports sampled for our study; the lower row shows the total number of reports in each application's bug-tracking system.}
+
+\end{table}
+
+To do so, we examine each application's bug-tracking system. For 6 applications that contain fewer than 1000 bug reports, as shown in Table~\ref{tab:issueapp}, we manually check every bug report. For applications with 1000 to 5000 bug reports, we randomly sample 100 bug reports that have been fixed and contain the keywords \textit{performance}, \textit{slow}, or \textit{optimization}. 
+For Redmine and Gitlab, which have more than 10,000 bug reports, we sample 200 from them in the same way. By manually checking each report's discussion, source code, and patches, we identify the ones that truly reflect performance problems related to data processing on the server side. %\junwen{In order to reduce subjectivity of manual checking, 5 experts were involved; all had ORM experience and 4 had papers published about Rails applications. Every bug report is checked by at least 2 of them. }
+\textcolor{black}{
+%5 experts are involved; all have ORM experience and 4 have papers published about Rails applications. 
+Every bug report is cross-checked by at least two authors.}
+This results in \numissues reports in total from all 12 applications, as shown in Table~\ref{tab:issueapp}. 
+%\alvin{we need to explain what is the point of doing this}
+%\cong{I think the number in the table seems small and people would question that your sampling is biased. Maybe we can look at issues in the previous, like 2 years? Besides, why bring out issues (but not summarzing them as a finding)? Are they discussed anywhere else?} 
+
+\subsection{Threats to Validity}
+Threats to the validity of our study could come from multiple sources. Applications beyond these 12 applications may not share the same problems as these 12 applications. The profiling workload synthesized by us may not accurately represent the real-world 
+workload. The machine and network settings of our profiling may be different from real users' setting.
+Our study of each application's bug-tracking system does not consider bug reports that are not fixed or not clearly explained. 
+%\shan{discuss whether our profiling-based analysis affected by issue study? } 
+Despite these aspects, we have made our best effort in conducting a comprehensive and unbiased study, and we believe our results are general enough to guide future research on improving performance of ORM applications.
+
+

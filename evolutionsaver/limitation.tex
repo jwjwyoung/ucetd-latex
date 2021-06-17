@@ -1,0 +1,30 @@
+
+\textbf{Threats to validity.}
+As discussed in Section \ref{sec:approach}, 
+\Tool may raise false alarms in rare cases.
+%although we have not observed these cases in practice.
+%Both Rails and Django allow developers to use special key words to declare non-persistent fields in a model class. In rare cases, a table column may be deleted from table, while a non-persistent field with the same name could be added to the same class. 
+%Besides schema, it's possible for developers to define the classes' fields in multiple manners. For example Django allows using @property decorator on a function so that a class can use it as a field and Rails has similar API attr\_accessor. The application code that refers to those fields might be considered as inconsistent code incorrectly. We already tried our best to eliminate their influence in our tool design. But due to the flexibility of the languages, there might left some cases that our tool cannot handle.
+%In addition to what already discussed in Section \ref{sec:approach}, 
+There are also sources of false negatives.
+%Firstly, the query extraction relies on type inference which only works within a file, it's possible to miss queries that are issued across files. Secondly, 
+%the code parsing relies on existing parser libraries (pyparser for Django, and yard for rails), 
+Application code that cannot be parsed by pyast or Yard cannot be analyzed by 
+\Tool. A schema may be changed by SQL commands issued directly to the database
+without any record in migration files. This is considered a bad  practice~\cite{migration-guide} and is not handled by \Tool.
+A schema may also be changed in migration files 
+through raw SQL commands wrapped in ORM APIs like
+\texttt{migrations.RunSQL(...)} in
+Django and \texttt{migrations.execute(...)} in Rails. 
+This feature is rarely used by web developers (less than 1\% of cases in our study), and is not handled by \Tool.
+If the new version adds a table \texttt{T}, and then changes the schema about 
+\texttt{T} or its columns, indices, or
+associations, \Tool would not check whether the new code is consistent with the
+schema of \texttt{T}, as \texttt{T} does not exist in the old version.
+Finally, what we observed in the 12 Rails and Django applications may not apply to
+other open-source applications.
+
+% \junwen{Why cannot we keep a record of functions with @property decorator, and remove the false positive}
+
+% \junwen{Add the developers change code after schema change}
+% \textbf{Django limitations.} Functions with the @property decorator that queries can refer to can create false positives for \Tool{}. For example, if a column is deleted but a function with an @property decorator that has the same name as that deleted column is created, \Tool{} will mark queries that refer to the function as queries that incorrectly refer to the schema. Thus, \Tool{} incorrectly raises these queries as errors because of the @property decorator (should I include an example). More generally, tables/columns/association relationships/indexes that are not recorded in an application’s migrations will not be included in the \Tool{}’s schema extraction and therefore there might be some false positives that arise. Annotations applied to a schema by a query in which the name of said annotation is the same as a deleted/renamed column can create false positives because that new annotation is not recorded in the extraction of the app’s schema. \Tool{} also requires python version >= 3.9.4 to be able to run.

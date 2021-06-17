@@ -1,0 +1,18 @@
+\begin{table}
+\caption{API misuses in latest versions}
+\label{tab:badapi}
+{
+\begin{tabular}{rl}
+\toprule
+Misuse Pattern & Applications\\
+\midrule
+\texttt{count(*)>0} $\Rightarrow$ \texttt{exists?} &\\
+\texttt{.map} $\Rightarrow$ \texttt{.pluck} & Red$_3$\\
+\texttt{where.first} $\Rightarrow$ \texttt{find\_by} & \\
+\texttt{*} $\Rightarrow$ \texttt{*.except(:order)} & \\
+... & ...\\
+\bottomrule
+\end{tabular}
+}
+{\footnotesize \\ Subscript: \# of misuses in the latest version of an application \par}
+\end{table}

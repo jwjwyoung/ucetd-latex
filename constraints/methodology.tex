@@ -1,0 +1,32 @@
+\subsection{Application selection}
+ There are many ORM frameworks available (e.g., Ruby on Rails, Django, Hibernate, etc.). Among them, Rails is the most popular on Github. 
+Thus, we studied 12
+open-source Ruby on Rails applications, including the top two most popular Ruby applications from six major categories of web applications on GitHub: Discourse (Ds) and Lobster (Lo) are forums; Gitlab (Gi) and Redmine (Re) are collaboration pplications; Spree (Sp) and Ror ecommerce (Ro) are Ecommerce applications; Fulcrum (Fu) and Tracks (Tr) are Task-management applications; Diaspora (Da) and Onebody (On) are social network applications; OpenStreetmap (OS) and FallingFruit (FF) are map applications. All of them have been actively developed for years, with hundreds to tens of hundreds of code commits. 
+
+\subsection{Issue selection}
+\begin{table} 
+% \setlength{\tabcolsep}{1 pt}  
+\centering 
+\caption{\# of data-constraint issues in our study and the total \# of issues in the issue-tracking system}
+%\footnotesize
+% @{\hspace{0.1in}}r@{\hspace{0.1in}}r@{\hspace{0.1in}}r@{\hspace{0.1in}}r@{\hspace{0.1in}}r@{\hspace{0.1in}}r@{\hspace{0.1in}}r@{\hspace{0.1in}}r@{\hspace{0.1in}}r@{\hspace{0.1in}}r@{\hspace{0.1in}}r@{\hspace{0.1in}}r@{\hspace{0.1in}}
+% \resizebox{0.9\columnwidth}{!}{
+\begin{tabular}{lrrrrrrrrrrrr}
+\toprule
+ & Ds & Lo & Gi & Re & Sp & Ro & Fu & Tr & Da & On & FF & OS\\
+\midrule
+Studied &14 & 1 & 16 & 30 & 31 & 2 & 1 & 1 & 11 & 5 & 0 & 2\\
+\midrule
+Total &4607 & 220 & 18038 & 12117 & 4805 & 114 &158 &1470 &3206 & 400 & 17 & 650\\
+\bottomrule
+\end{tabular}
+% }
+\label{table:issueapp0}
+% \vspace{-0.2in}
+\end{table}
+
+Section~\ref{sec:causes} studies the root causes and symptoms of real-world data constraint problems using
+\numissuescon reports sampled from the above 12 applications' issue-tracking systems. For the 9 applications that have medium-size
+issue databases (i.e., 100--5000 total reports), we randomly sampled 100 reports for each. For Redmine and Gitlab, which have more than 10,000 reports, we randomly sampled 200 reports for each. For FallingFruit, which only has 17 reports, we took all of them. Among the resulting 1317 sampled reports, we manually
+checked all the reports that contain keywords like ``data format,'' ``data inconsistency,'' ``data constraint,'' ``format change,'' ``format conflict,'' etc. We finally obtained
+\numissuescon reports that are truly related to data constraints, as shown in \tabref{issueapp0}.  

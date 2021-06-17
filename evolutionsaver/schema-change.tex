@@ -1,0 +1,75 @@
+% Please add the following required packages to your document preamble:
+% \usepackage{multirow}
+%\label{change}
+
+
+%Schema changes include addition, deletion, renaming on table, column, association, index, and constraint, and type change on association and column. For example, a column could change from a `int' type to a `string' type. And an association could change from `has\_one' to `has\_many'.  
+
+\textbf{Extended motivation.}
+A recent study~\cite{wang2017verifying} on 100 Rails applications 
+%with more than 400 commits 
+showed that most applications went through many schema changes.
+%are common: about 28 per application on average.
+%database schema has been changed at least once in all these 100 applications, with the average 
+%about 28 schema changes on average over each application's life time.  
+For further motivation, we studied
+12 Rails and Django web applications from different categories like forum, e-commerce, social network, etc. \footnote{The application list is in our code
+repository.} They are all highly rated, each with
+more than 1000 stars on GitHub, 11,000--900,000 lines of code and 500--100,000 commits. 
+
+
+% Schema change could happen on table, columns, associations, and indices
+% % \junwen{Isil's group also shows constraints change, we didn't since it's covered in previous paper and will not cause query issue}; 
+% a change could be addition, deletion, renaming. Besides, for column and association, it also contains type change. For example, a column could change from a `int' type to a `string' type. And an association could change from `has\_one' to `has\_many'. 
+% \input{app_table}
+
+\textit{How often are schema changes?} 18\% -- 85\% of application versions
+contain at least one schema change, and there are more than 8 changes for every
+version on average.
+Furthermore, changes are common throughout the development history of each
+application. For example, across the 6 Rails applications, the most recent 25\%
+of commits happen to contain about 25\% of all the schema
+changes in total.
+
+%, as shown in Table~\ref{tab:change-stat}.
+%Note that, for all  applications except for Lobsters \cite{lobsters}, we treat every public code release as a version; since Lobsters does not specify code release/version, we treat every 100 code commits as one version. 
+
+\textit{What types of changes are there?} As shown in Table \ref{tab:change-stat},
+ changes to various aspects of the schema
+ %tables, columns, association relationships (e.g., `has\_one'
+%or `has\_many' relationship between two tables), and table indices, 
+are all common.
+About three quarters of changes add tables, columns, or indices, and
+do not directly cause inconsistency with existing code. The remaining
+one quarter of changes modify or delete existing tables, columns,
+associations, or indices, immediately threatening code consistency, and hence
+are the target of \Tool, as detailed
+in Table \ref{tab:overview}.
+
+
+\iffalse 
+\textbf{How schema changes vary with age?} We split every application' history into four quarters, each with the same number of releases/versions and count the average number of schema changes in each quarter (time gaps between code releases
+are stable within each application). As shown in Figure~\ref{fig:evo-time}, although there are more changes in the first two quarters, changes in the latter two quarters
+are still common.
+%, indicating that schema-related refactoring is necessary for applications at any development stage no matter it's new or mature. 
+%\shan{If you want to save space, you can replace Figure 1 with a text explanation saying how many changes are there in each major version: I assume there are 13 major versions for AWX? Based on AWX, I feel there are indeed more schema changes at the beginning, but there are still a good amount of changes lat j er on. That is probably a more fair claim.}
+
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\columnwidth]{figs/breakdown-4.pdf}
+    \caption{Quarter Breakdown of Schema Changes (Aggregated View)}
+    \label{fig:evo-time}
+\end{figure}
+% \shan{Explain how is your study different from that by
+% Isil's group. It is also fine if your study is similar
+% with Isil's group's study, and just that you look at different sets of applications. No matter what is the case, please explain clearly.}
+\fi 
+
+
+% \shan{need to introduce these applications a bit. why you choose these applications to study; how large they are; how long they have been under development, etc.}
+
+%Overall, schema changes of various types broadly exist in applications across their development phases. Related refactoring support will be broadly beneficial.
+
+
+\input{evolutionsaver/schema_change_table}

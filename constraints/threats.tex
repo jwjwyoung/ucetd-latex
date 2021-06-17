@@ -1,0 +1,50 @@
+\subsection{Impact of False Positives}
+Our scripts for checking constraints inconsistency across layers has some false positives, of which  the vast majority come from two types of constraints: (1) string-length constraints in database, (2) presence constraints in applications. The remaining false positives are due to some validation/migration API call parameters being derived from function calls or non-constant expressions, which we do not currently evaluate. 
+
+Such false positives have limited impact on the paper's findings and are already considered in our finding presentation:
+
+RQ1: This has little impact. The overall trends like many data fields associated with constraints, DB containing most constraints will not be affected by these small number of false positives.
+
+RQ2: This has negligible impact. For instance, the number of versions with constraint changes remains the same even if we do not consider the above two types of constraints;  
+
+RQ3: There is no impact since the real-world issue study is conducted manually;
+
+RQ4: This has negligible impact. All findings in Table 1 still hold, as they either are not related to those two types of constraints or are reported with false positives already pruned or carefully considered. For instance, although our script reported 1,650 database string length constraints missing in the application, we intentionally only highlight ``1000+ string fields ...'', instead of 1,650, in Table 1, exactly because we have taken the potential impact of false positives into account. 
+
+\subsection{Threats to Validity}
+ \textbf{Internal Threats to Validity}:
+As discussed in 
+Section~\ref{sec:back_constraints} and \ref{sec:wherewhat},
+we only considered DB constraints declared through Rails built-in migration APIs, but not those through SQL queries, which are extremely rare (fewer than 30
+across all 12 applications). 
+Our analysis covers only native DB types such as string, numeric, and datetime types, and excludes non-native DB types such as JSON, spatial, or IP format, which together account for less than 1\% of all columns. Front-end constraints specified through JavaScript files were not considered. 
+Finally, our static checkers have false positives as discussed in 
+Section~\ref{sec:one_where} and \ref{sec:solution}.
+
+\textbf{External Threats to Validity}:
+The 12 applications in our study clearly may not represent all real-world applications;
+the \numissues issues studied also may not represent all constraint-related issues in these applications;
+the 100 participants of our user-study from MTurk may not represent all real-world users. Overall, we have tried our best to conduct an unbiased study.
+
+As discussed in Section~\ref{sec:back_constraints}, other ORM frameworks, like
+Django and Hibernate, also let developers specify application and database constraints  like that in Rails.
+We sampled 22 constraint-related issue reports from the top 3 popular Django applications on Github, and observed similar
+distributions, as shown below. 
+\begin{table}[h]
+%\caption{Similar issues in Django apps}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+& WHERE
+&  WHAT & WHAT  & WHEN  & HOW & SUM  \\  
+& & vs.code & vs.user &  & &\\
+\midrule
+django-cms \cite{django-cms}& 1     & 2           & 3          & 3    & 1   & 10   \\ \midrule
+zulip \cite{zulip}     & 1     & 4           & 2          & 0    & 0   & 7   \\ \midrule
+redash \cite{redash}    & 0     & 2           & 0          & 0    & 3   & 5   \\ \bottomrule
+\end{tabular}
+}
+\label{django-issue}
+\end{table}
+
+

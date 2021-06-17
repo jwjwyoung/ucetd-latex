@@ -1,0 +1,115 @@
+\section{Finding more API misuses}
+\label{sec:staticChecker}
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+            \node[shape=circle,draw,inner sep=1.5pt] (char) {#1};}}
+ \newcommand*\smallcircled[1]{\tikz[baseline=(char.base)]{
+            \node[shape=circle,draw,inner sep=1pt] (char) {#1};}}
+            
+Some problems described in Section~\ref{causes:api} are about simple API misuses. We identify 9 such simple misuse patterns, as listed in Table \ref{tab:badapi}, and implement a static analyzer to search for their existence in latest versions of the 12 ORM applications. 
+Due to space constraints, we skip the implementation details. 
+%through regular expression matching. 
+To recap, these 9 API patterns cause performance losses due to ``An Inefficient Query'' 
+({\footnotesize \circled{1}, \circled{2}, \circled{3}}), 
+``Moving Computation to the DBMS''
+({\footnotesize \circled{7}, \circled{8}, \circled{9}}),
+``Moving Computation to the Server''
+({\footnotesize \circled{5}}),
+``Inefficient Updating''
+({\footnotesize \circled{4}}), and
+``Unnecessary Data Retrieval''
+({\footnotesize \circled{6}}), as discussed in Section~\ref{causes:api}. 
+
+\begin{table}
+\vspace{-0.05in}
+\centering
+\caption{API misuses we found in the latest versions}
+{\small
+\label{tab:badapi}
+\begin{tabular}{l@{\hspace{0.01in}}rrrrrrrrrr}
+\toprule
+App. & \circled{1}  & \circled{2}   & \circled{3} & \circled{4} & \circled{5}  & \circled{6}  & \circled{7}  & \circled{8} & \circled{9} & SUM \\
+\midrule
+Ds      & 8  & 61  & 0 & 0 & 6  & 6  & 3  & 0 & 1 & 85  \\
+\midrule
+Lo      & 1  & 38  & 0 & 0 & 0  & 5  & 1  & 0 & 0 & 45  \\
+\midrule
+Gi      & 7  & 3   & 0 & 1 & 6  & 3  & 3  & 0 & 0 & 23  \\
+\midrule
+Re      & 3  & 32  & 0 & 1 & 16 & 7  & 0  & 0 & 0 & 59  \\
+\midrule
+Sp      & 2  & 10  & 0 & 0 & 0  & 0  & 7  & 1 & 0 & 20  \\
+\midrule
+Ro      & 0  & 7   & 0 & 1 & 1  & 0  & 2  & 0 & 0 & 11  \\
+\midrule
+Fu      & 0  & 0   & 0 & 0 & 2  & 0  & 0  & 0 & 0 & 2   \\
+\midrule
+Tr      & 4  & 22  & 0 & 1 & 3  & 0  & 0  & 0 & 0 & 30  \\
+\midrule
+Da      & 5  & 42  & 1 & 1 & 0  & 8  & 0  & 0 & 0 & 57  \\
+\midrule
+On      & 10 & 60  & 0 & 0 & 6  & 0  & 0  & 0 & 0 & 76  \\
+\midrule
+FF      & 2  & 0   & 0 & 2 & 0  & 0  & 0  & 0 & 0 & 4   \\
+\midrule
+OS      & 0  & 12  & 0 & 0 & 2  & 2  & 0  & 0 & 0 & 16  \\
+\midrule
+SUM     & 42 & 287 & 1 & 7 & 42 & 31 & 16 & 1 & 1 & 428\\
+\bottomrule
+\end{tabular}
+}
+
+{\footnotesize 
+\begin{tabular}{ll}
+\smallcircled{1}: \texttt{any?} $\Rightarrow$ \texttt{exists?} & \smallcircled{2}: \texttt{where.first} $\Rightarrow$ \texttt{find\_by} \\
+\smallcircled{3}: \texttt{*} $\Rightarrow$ \texttt{*.except(:order)} & \smallcircled{4}: \texttt{each.update} $\Rightarrow$ \texttt{update\_all} \\
+\smallcircled{5}: \texttt{.count} $\Rightarrow$ \texttt{.size} & \smallcircled{6}: \texttt{.map} $\Rightarrow$ \texttt{.pluck} \\
+\smallcircled{7}: \texttt{pluck.sum} $\Rightarrow$ \texttt{sum} & \smallcircled{8}: \texttt{pluck + pluck} $\Rightarrow$ \texttt{SQL-UNION}\\
+\multicolumn{2}{l}{\smallcircled{9}: \texttt{if exists? find else create end} $\Rightarrow$ {find\_or\_create\_by}}\\
+\end{tabular}
+ \\
+
+\par} 
+\end{table}
+
+As shown in Table \ref{tab:badapi}, 
+every API misuse pattern still exists in at least one application's latest version. Worse, 4 patterns each occur in over 30 places across more than 5 applications. 
+We have checked all these 428 places and confirmed each of them. For further confirmation, we posted them to corresponding application's bug-tracking system, and every category has issues that have already been confirmed by application developers.
+%\junwen{For each pattern, we have received confirmation from at least one application developers that what we found are indeed API misuses.} 
+\numconfirmedapi API misuses have been confirmed, and \numfixedapi already fixed in their code repositories based on our bug reports. None of our reports has been denied. %Furthermore, \circled{1} and \circled{5} have already been merged to their repository in Onebody.
+
+Only 3 out of these 428 API misuses coincide with the 64 performance problems listed in Table~\ref{tab:freq} and fixed in Section~\ref{sec:opt}. This is because most of these 428 cases do not reside in the 40 problematic actions that we have identified as top issues in our profiling. However, they do cause unnecessary performance loss, which could be severe under workloads that differ from those used in our profiling.
+
+In sum, the above results confirm our previously identified issues, and furthermore indicate that simple API misuses are pervasive across even the latest versions of these ORM applications.
+Yet, there are many other types of API misuse problems discussed in Section \ref{causes:api} that cannot be detected simply
+through regular expression matching and will require future research to tackle.
+
+\begin{comment}
+
+\begin{table}
+\caption{API misuses in latest versions}
+\label{tab:badapi}
+{
+\begin{tabular}{rl}
+\toprule
+Misuse Pattern & Applications\\
+\midrule
+\texttt{count(*)>0} $\Rightarrow$ \texttt{exists?} & {Ds$_9$, Lo$_1$, Gi$_7$, Re$_3$, Sp$_2$, Tr$_4$, Da$_5$, On$_10$, FF$_2$}\\
+\texttt{where.first} $\Rightarrow$ \texttt{find\_by} & {}\\
+\texttt{*} $\Rightarrow$ \texttt{*.except(:order)} & \\
+\texttt{each.update} $\Rightarrow$ \texttt{update\_all} & \\
+\texttt{.count} $\Rightarrow$ \texttt{.size} & Red$_3$\\
+\texttt{.map} $\Rightarrow$ \texttt{.pluck} & Red$_3$\\
+\texttt{.map} $\Rightarrow$ \texttt{.pluck} & Red$_3$\\
+\texttt{pluck.sum} $\Rightarrow$ \texttt{sum} & Red$_3$\\
+\texttt{array + array} $\Rightarrow$ \texttt{UNION} & Red$_3$\\
+
+\texttt{if exists? } $\Rightarrow$ \&{}\\
+
+\texttt{find\_or\_create\_by} & Red$_3$\\
+
+\bottomrule
+\end{tabular}
+}
+{\footnotesize \\ Subscript: \# of misuses in the latest version of an application \par}
+\end{table}
+\end{comment}

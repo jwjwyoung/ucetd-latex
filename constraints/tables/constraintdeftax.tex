@@ -1,0 +1,22 @@
+\begin{table}
+\centering
+\setlength{\tabcolsep}{1.2pt}  
+\caption{Different types of constraints in web apps}
+\label{table:constraintdeftax}
+\resizebox{.7\columnwidth}{!}{
+\begin{tabular}{@{}llll@{}}
+\toprule
+{\bf Run-time check}               & {\bf Source-code} & {\bf Specification}  & {\bf Specification} \\ 
+{\bf location}                     & {\bf location}    & {\bf language}       & {\bf API} \\
+\midrule
+Front end                          & View  & HTML & Reg. expression           \\ \midrule
+\multirow{3}{*}{Application server}& Model & Ruby & Built-in validation API    \\ \cmidrule(l){2-4} 
+                                   & Model & Ruby & Custom validation API  \\ \cmidrule(l){2-4} 
+                                   & Model/Controller&Ruby & Custom sanity check \\ \midrule
+\multirow{2}{*}{Database server}   & Migration files &Ruby& ActiveRecord::Migration API\\ \cmidrule(l){2-4} 
+                                   & Migration files &SQL & SQL ALTER TABLE queries   \\ \bottomrule
+\end{tabular}
+}
+ \vspace{-0.2in}
+   
+\end{table}

@@ -1,0 +1,70 @@
+\section{Correctness}
+\label{sec:con-rel}
+
+%\shan{Isil's group's paper on synthesizing database changes}
+
+%There are many related researches how leveraging application or database constraint to either verify certain properties or improve the performance. We summarized them as below.
+\paragraph{\bf Verifying data constraints.} Prior work has investigated verifying    database-related constraints.  ADSL~\cite{bocic2019inductive} verifies data-model related invariants (e.g., whether each todo object is associated with a project object) using first order logic, while the invariants are provided by users using their invariant language. Singh and Wang ~\cite{singh2017generating, wang2019synthesizing} check whether a set of DB constraints still hold when DB schema evolves while Caruccio~\cite{caruccio2016synchronization} conducts a survey of related work in this domain. Pan~\cite{pan2014guided} proposes a method to leverage symbolic execution to synthesize a database to verify different types of constraints like query construction constraints, DB schema constraints, query-result-manipulation constraints, etc.
+
+
+\paragraph{\bf Verifying web applications using constraints.} Another line of work focuses on using constraints provided by the DB or application for application verification
+and synthesis, like verifying the equivalence of two SQL queries\cite{cosettePLDI, cosetteOOPSLA, cosetteCIDR}, DB applications
+\cite{wang2018verifyequal}, synthesizing a new DB program with a new scheme
+given the original program with an old scheme \cite{wang2019synthesizing},
+and handling chains of interactive actions \cite{deutsch2005verifier}. 
+
+ \paragraph{\bf Other types of data constraints} Much previous research 
+has looked at how to specify security/privacy-related data
+constraints and how to verify or enforce those constraints across different
+components of database-backed applications
+\cite{karapanos2016verena, near2014derailer, yang2016precise, alkhalaf2012viewpoints}.
+These constraints are currently not supported by web application
+frameworks, and are orthogonal to this study.
+%allows developers to specify integrity policy using ``trusted context'' and verifies it across the code, the data, and the query;
+%Derailer~\cite{near2014derailer} uses symbolic execution across the application and the database to find data-exposure bugs;
+%Jacqueline~\cite{yang2016precise} presents a provable programming model to specify the privacy policies \shan{is privacy policy constraint?}\cong{not exactly the constraints we described in the paper, more like access control, but similarly something that need to be enforced across multiple layers}
+%based on the information flow from application code to database queries. 
+  
+ \paragraph{\bf Leveraging constraints to improve performance.} Using database constraints to improve query performance is already widely adopted in database systems. For example, Wander~\cite{li2016wander} leverages foreign key constraints to accelerate the sampling of join queries. Other work leverages DB data constraints to find an equivalent but more efficient query plan, for instance, Chestnut~\cite{cong2019chestnut} adds constraints as extra assumptions to help synthesize better query plans, and Quro~\cite{quro} leverages data access constraints to optimize transactional applications. Although much work looked at how to leverage data constraints, little work has been done on studying how the constraints are defined and used in DB-backed
+applications, or what are the common issues related to these data constraints. Our work reveals that developers are spending a lot of effort managing constraints and suffer many problems that are hardly paid attention to in research work.
+These findings open new research opportunities like automating constraint-consistency check or making the constraint changes easier for developers. 
+
+ \paragraph{\bf Schema change and code consistency}  MIGRATOR
+\cite{wang2019synthesizing} analyzes schema changes in SQL and synthesizes SQL queries,
+while \ETool looks at Rails (Ruby) and Django (Python) application; MIGRATOR handles
+renaming changes and structure changes like moving a column from one table to another,
+while \ETool handles all the changes in Table \ref{tab:overview}.
+
+%Wang \cite{wang2019synthesizing} worked on automatically synthesizing a new version of a database program given its original version and the source and target schemas.
+
+\begin{comment}
+1. Verification of constraints on DB schema change 
+	— Synchronization of Queries and Views Upon Schema Evolutions: A Survey (3)
+	— Generating Concise Entity Matching Rules (1)
+	— Synthesizing Database Programs for Schema Refactoring (2)
+
+
+2. Verification of data consistent with constraints
+	— database test related work (Tao Xie, etc.)
+	-- Guided Test Generation for Database Applications via Synthesized
+Database Interactions (7)
+
+
+3. Verification of web applications
+	— A Verifier for Interactive, Data-driven Web Applications (verify chains of actions against spec)(wave)
+	— Inductive verification of data model invariants in web
+applications using first-order logic (invariants)
+	— Verifying Equivalence of Database-Driven Applications
+	— Rubicon: Bounded Verification of Web Applications
+
+4. Constraints/verification for security/access control
+	— Derailer: Interactive Security Analysis for Web Applications (verify what data might be exposed)
+	— Finding Access Control Bugs in Web Applications with
+CanCheck
+	— Precise, dynamic information flow for database-backed applications
+	— Verena: End-to-End Integrity Protection for Web Applications
+
+5. Constraints for performance
+	— Axiomatic Foundations and Algorithms for Deciding Semantic Equivalences of SQL Queries~\cite{chu2018axiomatic}
+
+\end{comment}

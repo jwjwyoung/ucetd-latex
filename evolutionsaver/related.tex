@@ -1,0 +1,11 @@
+Recent work uses
+ORM-aware static analysis to detect performance anti-patterns \cite{yang2018powerstation, chen2016finding0} and data constraint problems \cite{yang2020managing} in database-backed web applications. They did not look at
+schema changes and are orthogonal to our work. 
+%https://dl.acm.org/doi/pdf/10.1145/3314221.3314588 
+%Our study does not consider constraint change since it's well studied in our previous work~\cite{yang2020managing}.
+\Tool is motivated by recent work \cite{wang2017verifying, wang2019synthesizing} about schema changes in web applications, but is different from
+them as discussed earlier. Specifically, MIGRATOR
+\cite{wang2019synthesizing} analyzes schema changes in SQL and synthesizes SQL queries,
+while \Tool looks at Rails (Ruby) and Django (Python) application; MIGRATOR handles
+renaming changes and structure changes like moving a column from one table to another,
+while \Tool handles all the changes in Table \ref{tab:overview}.

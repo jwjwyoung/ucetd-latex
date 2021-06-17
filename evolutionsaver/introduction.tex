@@ -1,0 +1,163 @@
+\label{sec:intro}
+Modern web applications often use database engines to 
+manage a large amount of user data, such as user profiles in social network applications and transaction
+records in on-line shopping platforms~\cite{webapp}.  
+The schema of such data goes through changes, such as table renaming, column
+deletion, and others, for better performance or functionality when an application evolves \cite{wang2017verifying}.
+Unfortunately, it is difficult for developers to keep their code 
+consistent with database schema changes all the time, a task we
+refer to as \textit{schema-related code refactoring}, with any inconsistency leading
+to application crashes.
+
+Schema-related refactoring and
+traditional refactoring like class renaming share similarities, given that
+popular Object Relational Mapping (ORM) frameworks, such as Rails \cite{rails},  
+Django \cite{django}, and Hibernate \cite{hibernate},
+allow database data to be
+updated and retrieved in an object-oriented way---the name of a database table corresponds to the name of a model class
+and the names of table columns are the same as class fields.
+
+%\shan{TODO: we may need to expand the onebody example}
+However, they also differ in various aspects, due to the unique nature of persistent data,
+as we elaborate below\footnote{Our discussion generally applies to
+all web applications developed upon ORM frameworks, although our
+examples use Ruby on Rails applications.}.
+
+
+
+%Comparing with traditional software, database-backed web applications face the unique code-maintenance challenge of making code changes consistent with database schema changes. Because web applications are often constructed using Object Relational Mapping (ORM) frameworks allowing the properties and relationships of the objects in an application to be easily stored and retrieved from a database in an object-oriented way, which can go beyond the form of class name and field name as used in traditional software, e.g.,  in line 2 in listing~\ref{onebody-query}, the \texttt{sequence} column of \texttt{people} table is used as a parameter of \texttt{order} function call in the form of string. 
+
+
+
+% The class definition in database-backed web applications  will not explicitly declare its fields since database columns  will be mapped to the fields by ORM frameworks implicitly. 
+% ORM frameworks will implicitly map database columns to the object's class. 
+ 
+
+
+% \begin{lstlisting}[float=t,language=Ruby,label={onebody-query}, caption=Inconsistent code from Onebody]
+% app/controllers/checkin/families_controller.rb
+%     # select * from people where family_id = ? 
+%     # and is_deleted = ? order by sequence
+% 1   @family.people.undeleted.order('sequence')
+
+% app/models/person.rb
+% 2   person.sequence = 1
+% \end{lstlisting}
+% For example, in Spree \cite{spree}, an online-shopping application, a table named orders is used to 
+% keep the order information. In one version, 
+% developers renamed a column in this table from \texttt{guest\_token} to \texttt{token} since the column starts to store \texttt{tokens} used in login cookies for not only guest but also general users\shan{what does token mean? what does general token mean?}, it has to change all the references to the old name \texttt{guest\_token} to the new name \texttt{token}, which results in 284 lines of code change across 32 files. 
+%It's challenging for developers to manually refactor the application code based on the schema change. 
+
+\textit{How is schema defined?} Different from a regular class whose 
+field names and field types are defined by its class
+declaration, a model class's structure has to match its corresponding database table that is created once at an application's installation or upgrade.
+%with its data retrieved into objects at run time.
+In fact, in some ORM frameworks like Rails, persistent fields of a model class are \textit{not} declared in its class
+definition and are instead automatically mapped by Rails from the corresponding table schema, which is 
+%Consequently, although every table (e.g., \texttt{people}) corresponds to a class
+%with a singularized name (e.g., \texttt{Person}), the schema, including table names, column
+%names and types, and other information, has to be 
+defined through ORM
+APIs like \texttt{create\_table} in Rails or
+\texttt{CreateModel} in Django in a type of files called
+\textit{migration files},
+as shown in Listing \ref{migration}. 
+%In fact, the corresponding model class definition needs not contain definitions of column fields.
+
+\textit{How is schema changed?} 
+%One cannot change the
+%schema (e.g., a column name) by changing the class definition. 
+Schema changes are expressed
+through ORM APIs in migration files (e.g., line 4 in Listing 
+\ref{migration}
+renames the column \texttt{sequence} in table \texttt{people}), 
+which informs the web application about how to 
+update its database during installation and upgrade.
+In an ORM framework like Rails, schema changes cannot be seen in
+class definitions.
+
+\lstinputlisting[float=t, basicstyle=\footnotesize\ttfamily, label={migration}, caption={Migration files from Onebody},language=Ruby]{migration.rb}
+
+\lstinputlisting[float=t,basicstyle=\footnotesize\ttfamily, label={onebody-query}, caption={Inconsistent code from Onebody},language=Ruby]{onebody-query.rb}
+
+\textit{What code refactoring is needed?} Following a schema
+change in the migration file, corresponding references in the
+application need to change. Some of these are just
+class or field renaming like in line 2 of Listing \ref{onebody-query}, while some require changing ORM APIs' parameters like in line 1 of Listing \ref{onebody-query}.
+%and hence requires ORM knowledge.
+
+For example, developers of Onebody~\cite{onebody}, a popular social network application, used 
+a table \texttt{people} to keep user information. In one commit, they renamed the \texttt{sequence} column in \texttt{people} to \texttt{position} (line 4 in Listing \ref{migration}). In the same commit, they
+correctly updated the reference to \texttt{sequence} in 6 places across 4 files like the one in line 2 of Listing \ref{onebody-query}, but forgot to change the other 5 places, 
+such as the parameter reference shown in line 1 of Listing
+\ref{onebody-query}. This inconsistency caused web users to
+suffer from webpage crashes~\cite{onebodyissue672}.
+%\url{https://github.com/seven1m/onebody/issues/672}}
+%\shan{the issue report does not read like application crash.}
+
+%https://github.com/spree/spree/pull/8826/files
+
+% Moreover, the challenge is escalated by the prevalent usage of Object-Relational Mapping (ORM) frameworks, such as Ruby on Rails~\cite{rails}, Django for Python~\cite{django}, and Hibernate for Java~\cite{django}. Because they provide a convenient way for developers to evolve their database schema over time using object-oriented code without issuing `ALTER TABLE' SQL commands to database, which eases the efforts and results in more frequent schema change. 
+% \shan{Do you have evidence that there are more frequent schema changes in ORM applications?
+% If not, I don't think we can claim it. I can imagine maybe it is more error prone, because
+% schema changes and declaration are in different files from files that use the tables and columns,
+% so that it is more isolated ... I don't know ...} 
+% \junwen{I have found that in an empirical study on web application not using ORM framework~\cite{qiu2013empirical}, the average schema change per release is 60, so we cannot draw the conclusion that orm schema changes faster. But their way of calculating change is to check every revision instead of every release. We may change our counting methodology and regenerate the result. 
+% }
+
+
+%TODO:\shan{There needs to be a clearer definition of what are code-schema inconsistencies.}
+%TODO:\shan{can some of the inconsistency get exposed by unit testing? }
+% Inconsistency between application code and its data schema could cause web-page crashes 
+% with database exceptions thrown 
+% Different from traditional software, the object class's fields in database-backed web applications are not declared explicitly in the class itself but mapped to the database columns by ORM frameworks implicitly
+ 
+% Thus, existing refactoring tools that tackle method or field renaming are not able to refactor the database-backed web applications.
+
+Recent work motivated tool support for schema-related refactoring  \cite{wang2017verifying} and proposed techniques to synthesize updates to a list of 
+SQL queries given the old schema and the new schema written in SQL
+\cite{wang2019synthesizing}. Although inspiring, it does not directly help
+many web applications, whose schema changes
+and database operations are expressed in ORM APIs, rarely if ever in raw SQL.
+
+%As a result, cross-stack analysis which combines the database information with application code is necessary to detect and fix the inconsistency  between application code and schema change. 
+%Existing work MIGRATOR~\cite{wang2019synthesizing} can automatically synthesize database program after schema refactor, however it can only work on database programs written in SQL. 
+% Also, MIGRATOR is guessing value correspondence from the name of table and column of two schema\shan{I don't understand}, which is possible to cause inaccurate mapping and generate incorrect refactoring. Also, MIGRATOR is not able to handle deletion change. \shan{I don't understand.} 
+
+
+
+This paper presents {}, a tool that uses ORM-aware static analysis to help schema-related code refactoring in web applications
+written in Rails \cite{rails} and Django \cite{django}, two popular web frameworks.
+%\shan{can we say 'most' popular? can we say web application frameworks, instead of ORM frameworks to make it sound more general?}. \junwen{According to the data \url{https://www.statista.com/statistics/1124699/worldwide-developer-survey-most-used-frameworks-web/}, Django and Rails are not the most popular web app frameworks. But based on data we collected on github before, for apps with more than 100 starts, the most popular is Rails and then django}
+Given two versions of a web application, 
+\ETool{} analyzes and identifies schema changes from
+migration files, searches for
+any code inconsistent with the new schema,
+and generates warnings and patches accordingly. %\shan{Why do we need the old code version? If I just give you one version,can you identify code--schema inconsistency?} \junwen{Yes, we can. Having the old version schema is to just make the detection even faster by only checking on the changed schema}.
+
+%As an IDE plugin, \ETool{} supports two usage scenarios: 1) it can semi-automate \shan{why semi? what is not automated?} the refactoring for an old application after users make data-schema changes \shan{what type of data schema changes do you support? What is the scope/limitations of your tool?}. 2) it can identify remaining inconsistency between the data schema and the application code, after
+%developers commit changes to both data schema and the application code.  %\shan{I can imagine two potential uses of this type of tools: (1) once a data schema change is made, it will help automate or semi-automate all the needed code changes; (2) given a data schema change AND changed software, it checks if there are inconsistency between the data schema and the software. Does your tool only offer functionality-2? Or do you offer both? I guess you offer both, if so, you should rephrase the usage flow and functionality description of your tool.} 
+%This work makes the following contributions:
+
+
+%\shan{What type of guarantees you can offer here? Do you guarantee that you will generate perfectly correct and complete refactoring?} 
+
+To ease its adoption, we have integrated \ETool into the popular 
+Visual Studio Code IDE~\cite{vscodepop} as a plugin. Web developers can use this plugin to
+guide their schema-related refactoring or to look for
+schema--code inconsistency bugs.
+
+In our evaluation with 12 popular Rails and Django applications, 
+\ETool detected \numRailsError schema--code inconsistencies 
+%in 72 files 
+caused by 35 schema changes in the past.
+%and 25 warnings caused by 4 schema changes in application code that are caused by schema changes.  Among the 80 errors, 
+We have reported 11 of them that exist in the latest versions to developers,
+and got 10 of them already confirmed and 6 of them already patched based on
+our suggestion.
+Our examination of the rest \numFixed inconsistencies shows that 
+they took many days for developers
+to discover and fix.
+%they took 378 days and 3 days on average for Rails and Django developers to discover and fix, respectively. %Moreover, \numfixedafterrelease of them are fixed after the version release. 
+
+\ETool's source code is on Github~\cite{sourcecode} and the plugin can be downloaded from Visual Studio Marketplace~\cite{vscodemarketplace}.

@@ -1,0 +1,150 @@
+% \Tool{} can be downloaded from Visual Studio Marketplace~\cite{vscodemarketplace} and easily installed in Visual Studio Code. 
+
+% % \shan{It is a bit strange to study 12 Rails apps in section 2, and only evaluate
+% % 6 of them here. Better make them consistent.} 
+
+% 
+
+
+We have evaluated \Tool{} using \numRailsApp Ruby-on-Rails applications and \numDjangoApp Django applications (the same 12 applications described in
+Section \ref{sec:back}). 
+For each application, we apply \Tool{} on all its consecutive commits.  
+
+\begin{table}
+\caption{Inconsistency Detected by \Tool}
+\label{tab:evaluation}
+\centering
+%\resizebox{0.8\columnwidth}{!}{
+\begin{tabular}{lrrr}
+\arrayrulecolor{black}\hline  
+\arrayrulecolor{black}\hline
+ & Rails  & Django  & Total\\
+%\# of schema change & 12 & 23 & 35\\
+\# of inconsistent queries & 38 & 48 & 86\\
+%\# existing in release & 20 & 10 & 30\\
+%\# of affected files & 26 & 31 & 57\\
+\# of inconsistent queries in latest versions &  1 & 10 & 11\\
+\# of inconsistent queries in past versions & 37 & 38 & 75\\
+%Avg. (median) commits to fix past inconsis. & 576 (135) & 9 (8) & -\\
+%Avg. (median) days to fix past inconsistency   &  378 (65) & 3 (3) & -\\
+\arrayrulecolor{black}\hline  
+\arrayrulecolor{black}\hline
+\end{tabular}
+%}
+\end{table}
+
+
+\textbf{Detection.} As shown in Table~\ref{tab:evaluation}. \Tool{} automatically identifies \numRailsError inconsistency errors caused by 35 schema changes, with no false positives based on our manual examination. Among them, 11 errors  exist in the latest versions. After reporting
+them to developers,
+10 already got confirmed. These 11 errors have existed for 234 days on average (median: 61 days) when reported by us. 
+The other \numFixed errors on average existed in these applications
+for 232 days (median: 7 days) and 409 commits (median: 16 commits)
+until finally discovered and fixed by developers.
+%took 378 days and 576 commits (median: 65 days and 135 commits)
+%for Rails, and 3 days and 9 commits for Django developers
+%to discover and fix. 
+In theory, some developers may intentionally
+split schema changes and follow-up code changes to separate commits.
+This is unlikely for most of these errors given the long gap taken to fix
+them.
+Moreover, about half of them were not fixed until after major code releases.
+%\numfixedafterrelease of them are fixed after the version is released.
+
+%\junwen{There are only 9 patches for Rails and 5 patches for  Django  are exactly the same as what \Tool generates. For the rest, the error is fixed by removing either the whole query, whole function, or even the file.}
+
+\textbf{Refactoring.} Among the 11 errors that we reported to developers, for 6
+of them, developers already accepted the refactoring patches suggested by
+\Tool and merged them into the main branch. For the other \numFixed errors that
+were fixed by developers in the past, the related statements, functions, or files were
+often deleted in the fixed commit. 
+%\shan{TODO: not a surprise, because ...}
+There are 13
+of them where related code regions still existed in the fixed commit, and these 13 fixes are 
+exactly the same as the refactoring suggested by \Tool. 
+
+%Among these 35 schema changes, in the same commit the schema change is committed, developers already tried to change the corresponding code for 15 schema changes with \developerfixed queries in 35 files, which can also be automated by our tool. 
+%\junwen{For developers' fix within the same commit, there are 9 patches for Rails and 18 patches for  Django  are exactly the same as what \Tool generates. }
+
+ 
+% \shan{what exactly are these warnings?} caused by schema change and generates patches for \numRailsError of them (i.e., all but the index deletion change). We examined all of the detected errors and warnings and the suggested fixes, and found no false positives. And most of them are already fixed in their later versions\shan{a lot of explanation is needed here. readers may wonder
+% whether you are simply detecting problems in an intermediate version that will not affect end
+% users. It would also be helpful if I know how long it took for the problem to be fixed.}. 
+% For those issues still exists in their latest versions \shan{how many are there in total?}, we have also reported 4 of them \shan{why do you only report 4?} to the issue tracking systems of these applications and 3 of them are already confirmed and merged. 
+
+% \shan{you also need to comment on what are potential false negatives of your tool.}
+
+\textbf{Performance.}
+ \Tool{} takes 3--125 seconds (35s on average) to process consecutive commits of Rails applications with 11,000--900,000 lines of code, and 1--40 seconds (19s on average) for Django apps with 17,000--174,000 lines of code.  
+% \shan{I noticed that you commented out the time information. I think it is necessary to just
+% briefly report how long it takes for your analysis.}
+
+\input{evolutionsaver/limitation}
+
+% \shan{1. Can you offer some examples about the confirmed problems?
+% 2. Please comment on the breakdown among rename vs. deletion vs. ... 
+% }
+
+% \begin{table}[ht!]
+%     \centering
+%     \caption{Evaluation result}
+%     \resizebox{0.8\columnwidth}{!}{
+%         \begin{tabular}{lrrrrr}
+%         \hline
+%           \hline
+%          \# of issue & Table  & Column  & Association  & Index   \\
+%         \hline
+%         % \multicolumn{5}{l}{Rails Applications}\\
+%         % \midrule
+%         % Discourse & x & x & x & x  \\         
+%         Lobster & 0 & 2 & 0 & 0 \\   
+%         Gitlab & 0 & 1 & 0 &  2 \\   
+%         % Redmine & x & x & x &  x \\   
+%         Spree & 0 & 6 & 1 &  0 \\   
+%         % Ror & 0 & 0 & 0 &  0 \\   
+%         % Fulcrum & 0 & 0 & 0 &  0 \\   
+%         Tracks & 0 & 4 & 4 &  0 \\   
+%         Diaspora & 0 & 4 & 0 &  3 \\   
+%         Onebody & 0 & 1 & 6 &  0 \\   
+%         % Falling-fruit & 0 & 0 & 0 &  0 \\   
+%         % Open street  & 0 & 0 & 0 &  0\\   
+%         \hline
+%         % \multicolumn{5}{l}{Django Applications}\\
+%         % \midrule
+%         Zulip & 0 & 2 & 0 & 0 \\   
+%         Awx & 0 & 1 & 0 &  0 \\   
+%         Saleor & 3 & 26 & 2 & 22 \\   
+%         Healthchecks & 0 & 2 & 0 & 0 \\   
+%         Gerapy & 0 & 1 & 0 & 0 \\   
+%         Posthog & 5 & 0 & 0 & 0 \\   
+%         \hline
+%         Sum & 8 & 51 & 13 &  27 \\   
+%         \hline
+%         \hline
+%         \end{tabular}
+%     }
+%     \label{tab:evaluation}
+% \end{table}
+
+
+
+
+
+\iffalse
+\begin{table}[t!]
+\caption{Developer's efforts}
+\label{tab:effort}
+\centering
+%\resizebox{0.8\columnwidth}{!}{
+\begin{tabular}{lrrr}
+\arrayrulecolor{black}\hline  
+\arrayrulecolor{black}\hline
+ & Rails & Django & Sum \\
+\# of schema change & 7 & 8 & 15\\
+\# of affected queries & 28 & 63 & 91\\
+\# of affected files & 16 & 31 & 47\\
+\arrayrulecolor{black}\hline  
+\arrayrulecolor{black}\hline
+\end{tabular}
+%}
+\end{table}
+\fi 

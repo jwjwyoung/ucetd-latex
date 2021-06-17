@@ -1,0 +1,37 @@
+\section{Overview}
+\label{sec:overview}
+In this chapter, we present a comprehensive two-pronged empirical study on a set of 12 Rails applications representing 6 common categories that exercise a wide range of functionalities provided by the ORM framework and DBMS. The study aims to answer three research questions:
+
+\begin{itemize}
+\item {\bf RQ 1}: How well do real-world database-backed web applications perform as the amount of application data increases?
+\item {\bf RQ 2}: What are the common root causes of performance and scalability issues in such applications?
+%are they related to data processing?
+\item {\bf RQ 3}: What are the potential solutions to such issues and can they be applied automatically?
+\end{itemize}
+
+We choose Rails as it is a popular ORM framework \cite{hotframework}.
+%which will be discussed in detail in Section \ref{sec:methodology}. 
+%
+%(i.e., forum, collaboration, e-commerce, task management, social network, and map\footnote{The categories is chosen from \cite{category}, most ORM apps falls in the 6 categories we choose.
+%
+%\shan{I forgot to ask you --- why did you pick these 6 categories?}
+%\cong{One reference for categorization I found online is https://en.wikipedia.org/wiki/Category:Web\_applications. My feeling is that most ORM apps falls in the five categories in the left column. If needed I can count the exact number (maybe for top 200 open source Rails/ORM apps)}
+%}). \alvin{I think we should keep this short and justify why these categories were picked in 3.1 instead}
+%
+%After identifying these applications, we first thoroughly profile each application to not only understand but also alleviate performance and scalability problems of the selected applications.%, which are top-2 most popular applications from GitHub for each of the 6 categories above. \alvin{why mention top-2 .. here? Shouldn't that be part of the justification in 3.1?}
+%
+We carefully examine \numissues fixed performance issues randomly sampled from the bug-tracking systems of these 12 applications. This helps us understand how well these applications performed on real-world data \textit{in the past}, and what types of performance and scalability problems have been discovered and fixed by end-users and developers in \textit{past versions}.
+
+To complement the above study, we also conduct thorough profiling and code review of the latest versions of these 12 applications. This investigation helps us understand how these applications \textit{currently} perform on our carefully synthesized data (to be explained in Section \ref{sec:methodology}),  what types of performance and scalability problems still exist in the \textit{latest versions}, and how they can be fixed.
+
+In terms of findings,
+for {\bf RQ1}, our profiling in Section \ref{sec:profiling} shows that, under workload that is no larger than today's typical 
+workload, 11 out of 12 studied applications contain pages in their latest versions that take more than two seconds to load and also pages that scale super-linearly. Compared to client-side computation (e.g., executing JavaScript functions in the browser), server-side computation takes more time in most time-consuming pages and often scales much worse. 
+These results motivate research to tackle server-side performance problems in ORM applications.
+
+For {\bf RQ2}, we generalize 9 ORM performance anti-patterns by thoroughly studying about 200 real-world performance issues, with \numissues collected from 12 bug-tracking systems and \numacissues manually identified by us based on profiling the same set of ORM applications (Section \ref{sec:causes}).  We group these 9 patterns into three major categories---ORM API misuses, database design problems, and trade-offs in application design.
+All but one of these patterns exist both in previous versions (i.e., fixed and recorded in bug-tracking systems) and the latest versions (i.e., discovered by us through profiling and code review) of these applications.
+6 of these anti-patterns appear profusely in more than half of the studied applications. While a few of them have been identified in prior work, the majority of these anti-patterns have \textit{not} been researched in the past.
+
+Finally, for {\bf RQ3}, we manually design and apply fixes to the \numacissues performance issues in the latest versions of these 12 ORM applications (Section \ref{sec:opt}). Our fixes achieve 2$\times$ median speedup (and up to \maxspeedup$\times$) in server-side performance improvement, and reduce the average end-to-end latency of 39 problematic web pages in 12 applications from \eoebefore seconds to \eoeafter seconds, making them interactive.
+Most of these optimizations follow generic patterns that we believe can be automated in the future through static analysis and code transformations. As a proof of concept, we implement a simple static checker based on our findings and use it to find hundreds of API misuse performance problems in the latest versions of these applications (Section~\ref{sec:staticChecker}).
