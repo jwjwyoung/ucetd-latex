@@ -1,0 +1,24 @@
+
+Previous chapter have shown that developers often struggle at writing efficient web applications
+using ORM frameworks
+\cite{yan:cikm17, junwen:icse2018, chen2016finding, cheung2013optimizing}. 
+Several ORM-related performance anti-patterns have been found to widely exist 
+in real world database-backed web applications and lead to application inefficiencies.
+%These performance problems often lead to several times' slow downs and cannot be optimized by
+%state of the art object-oriented program language compilers, 
+Unfortunately, many of these inefficiencies go undetected by compilers and database management systems as they focus solely on either the application code or the embedded queries, while recognizing such inefficiencies require both systems to work in tandem.
+%\shan{Alvin, the first two paragraphs are reorganized to address your earlier comments}
+
+This chapter presents PowerStation, an IDE plugin for Ruby on Rails (Rails) applications that automatically detects ORM-related
+performance problems and suggests fixes for them.
+It makes two contributions.
+First, we build a database-aware static analysis framework for Rails applications. 
+The current PowerStation prototype can already detect 6 common
+ORM performance anti-patterns and generate patches for 5 of them. 
+These anti-patterns include loop invariant query, dead store query, unused data retrieval, unoptimized common subexpression, API misuses, and inefficient data rendering.
+As summarized in previous work \cite{yan:cikm17, junwen:icse2018, chen2016finding}, only 3 patterns
+can be detected previously, and we are unaware of any tool that can automatically fix any of them. %such anti-patterns.
+
+Second, we have integrated PowerStation into %the most \alvin{how do you know?} 
+a popular Rails IDE, RubyMine~\cite{RubyMine}, 
+so that Rails developers can easily benefit from PowerStation to improve the efficiency of their applications.

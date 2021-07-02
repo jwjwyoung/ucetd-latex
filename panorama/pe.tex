@@ -1,27 +1,27 @@
-\section{\Tool view-centric cost estimator} 
+\section{\ToolP view-centric cost estimator} 
 %\junwen{shall we change the title of this section? it seems profiling makes people confused about how we detect the optimization opportunities} \alvin{To me this is a bit confusing as profiling is used to describe both the overall process of finding contributing queries and estimating their costs, and also the `dynamic' profiling used given a test workload}
 \label{sec:profile}
 
-There are two key tasks in \Tool's cost estimation. First, given an HTML tag,
-\Tool determines which database queries are executed
+There are two key tasks in \ToolP's cost estimation. First, given an HTML tag,
+\ToolP determines which database queries are executed
 to generate the data that is rendered through that tag (we refer to them as contributing queries). 
-Second, for each HTML tag, \Tool measures the data processing cost needed to render it.
+Second, for each HTML tag, \ToolP measures the data processing cost needed to render it.
 
 While a web page's load time consists of client side rendering time,
 network communication between client and server, 
 computation time on the server, and database query cost,
-\Tool's estimator currently focuses on database query cost, as query time often contributes a significant portion of the page load time. This is particularly true as the data size increases, and large query results lead to even more computation and rendering time. 
+\ToolP's estimator currently focuses on database query cost, as query time often contributes a significant portion of the page load time. This is particularly true as the data size increases, and large query results lead to even more computation and rendering time. 
 Query time/complexity is also
 difficult for developers to estimate, particularly given the ORM abstraction.
 As future work, we will incorporate other profiling tools to measure the performance of 
-the client code \cite{chromeDev}, network, and server computation as part of \Tool.
+the client code \cite{chromeDev}, network, and server computation as part of \ToolP.
 
 
 \subsection{Identifying contributing queries}
-\Tool identifies contributing queries for an HTML tag by statically analyzing
+\ToolP identifies contributing queries for an HTML tag by statically analyzing
 control and data dependencies in the ADG. Given an HTML tag in a view file, 
-\Tool first identifies all ADG nodes $N$ that contain the tag's unique ID ---
-these nodes contain the Ruby code embedded in the HTML tag. Then, \Tool 
+\ToolP first identifies all ADG nodes $N$ that contain the tag's unique ID ---
+these nodes contain the Ruby code embedded in the HTML tag. Then, \ToolP 
  traces backward along the ADG edges to
 identify all query nodes that any node in $N$ has control or data dependence upon. 
 All these queries, each identified by its ADG node ID and Ruby source code
@@ -32,13 +32,13 @@ will identify two contributing queries, nodes {\large \textcircled{\small 1}} an
 {\large \textcircled{\small 2}}.
 
 
-\Tool further conducts forward dependency checking in the ADG to see how many other
+\ToolP further conducts forward dependency checking in the ADG to see how many other
 HTML tags each query node contributes to. This number can be used
 as a weight in computing the data processing cost of an HTML tag
 --- if a query result is used to generate $k$ HTML tags
 (e.g., the query node {\large \textcircled{\small 1}} contributes to three HTML tags in Figure \ref{fig:icq}), 
 we could attribute $1/k$ of the query cost to each HTML tag if the web developers
-choose so (while by default \Tool attributes the complete query cost to each tag).
+choose so (while by default \ToolP attributes the complete query cost to each tag).
 
 \subsection{Cost analysis}
 
@@ -46,56 +46,56 @@ choose so (while by default \Tool attributes the complete query cost to each tag
 %analysis has to be placed first. The static analysis here is somewhat ad-hoc and more complicated to
 %explain, so I feel it is better to discuss the clean dynamic profiling first.}
 
-\Tool offers two modes of cost estimation with or without relying on testing workload.
+\ToolP offers two modes of cost estimation with or without relying on testing workload.
 
 \subsubsection{Dynamic profiling}
 \label{sec:profile_dynamic}
 
-If a testing workload is available, \Tool
+If a testing workload is available, \ToolP
 will measure the cost of each contributing query during a 
 testing run. However, using 
 the query execution log from the backend database engine as the testing workload does not work ---
 the database engine has no knowledge about frontend Ruby and HTML code, 
-and hence does not allow \Tool to connect the statement in the web application that issues the query and the HTML tag uses the query result.
+and hence does not allow \ToolP to connect the statement in the web application that issues the query and the HTML tag uses the query result.
 
-\Tool instead conducts its profiling through a hook API provided by Rails infrastructure, 
+\ToolP instead conducts its profiling through a hook API provided by Rails infrastructure, 
 {\tt ActiveRecordQueryTrace}. This API allows its hooked code to be called before and after
 issuing each SQL query. 
-Using this mechanism, \Tool logs the amount of time of each query and the line of source code that
+Using this mechanism, \ToolP logs the amount of time of each query and the line of source code that
 issues this query during the testing run, and attributes the time to the corresponding HTML tags using 
 contributing query analysis as discussed above.
 
 
 \subsubsection{Static estimation}
 \label{sec:profile_static}
-Since a bottleneck-exposing workload may not be available during in-house testing, \Tool also
+Since a bottleneck-exposing workload may not be available during in-house testing, \ToolP also
 uses static analysis to estimate the potential data-processing cost (in terms of its data complexity) to render each HTML tag.
-For ease of estimation, \Tool assumes that all tables in the database have the same size $D$. 
+For ease of estimation, \ToolP assumes that all tables in the database have the same size $D$. 
 %Future work can improve the estimation accuracy by refining this assumption.
-Then, for each contributing query, \Tool estimates its complexity (i.e., how its execution
+Then, for each contributing query, \ToolP estimates its complexity (i.e., how its execution
 time might increase with $D$) by considering:
 (1) the number of times this query might be issued, and
 (2) time taken to execute one query instance.
 
-To estimate the first factor, \Tool analyzes loops.
+To estimate the first factor, \ToolP analyzes loops.
 If the query $Q$ is not contained in any loop or is only contained by a loop whose 
 iteration number does not increase with $D$, which we refer to as a {\it bounded loop}, 
-\Tool then considers $Q$ to be executed for a constant number of times.
-Otherwise, \Tool considers $Q$ to be executed for $D^k$ times, with $k$ being the number of {\it unbounded} loops containing $Q$.
-To identify the {\it unbounded} loops, \Tool analyzes the bound variable 
+\ToolP then considers $Q$ to be executed for a constant number of times.
+Otherwise, \ToolP considers $Q$ to be executed for $D^k$ times, with $k$ being the number of {\it unbounded} loops containing $Q$.
+To identify the {\it unbounded} loops, \ToolP analyzes the bound variable 
 of all loops that contain\ $Q$.
 If the loop iterates through a set of records returned by an 
 {\it unbounded} database query,
-\Tool considers the loop to be unbounded.
+\ToolP considers the loop to be unbounded.
 Specifically, in Rails, a query is {\it unbounded} in all but the following
 three cases:
 (1) it always returns a single value, like a {\tt SUM} query; 
 (2) it always returns a single record by selecting on primary key; %through the {\tt uniq} identifier; 
 (3) it always returns a bounded number of records using the {\tt LIMIT} keyword.
 
-To estimate the second factor, \Tool first identifies all the query operators
+To estimate the second factor, \ToolP first identifies all the query operators
 inside the query $Q$. For example, for the query node {\large \textcircled{\small 2}} in
-Figure \ref{fig:icq}, \Tool would identify three query operators 
+Figure \ref{fig:icq}, \ToolP would identify three query operators 
 from the {\tt @user.issues.active.count} statement: 
 a {\tt SELECT} to get {\tt issues}, 
 another {\tt SELECT} to get {\tt active}, and finally a {\tt count} operator.
@@ -106,12 +106,12 @@ the complexity of an operator that explicitly uses index, such as
 {\tt find} and {\tt find\_by\_id}, to be constant. 
 %\cong{{\tt find} does not explicitly use an index. we may say we assume tables have index on id and foreign key (or have index on every field), and every indexing operator has a constant cost.}
 
-Putting these two factors together gives \Tool the complexity estimation
+Putting these two factors together gives \ToolP the complexity estimation
 for one contributing query $Q$. For example, the estimated complexity of the 
 query node {\large \textcircled{\small 2}} in Figure \ref{fig:icq} is O($D^3$). If it is
 enclosed in an unbounded loop, its complexity would increase to O($D^4$).
 
-\Tool could choose to deliver the above performance information using either a 
+\ToolP could choose to deliver the above performance information using either a 
 detailed text description or a numeric score. The current prototype
 uses the latter: it uses the highest 
 complexity among all contributing queries as the complexity score of an
@@ -122,7 +122,7 @@ the complexity scores of HTML node {\large \textcircled{\small 4}} and  {\large 
 both 1, based on the O($D$) complexity estimated for query node
 {\large \textcircled{\small 1}}.
 
-Of course, this is just a best-effort estimation from \Tool. There are 
+Of course, this is just a best-effort estimation from \ToolP. There are 
 several potential
 sources of inaccuracy that can be improved by future work.
 For example, some database tables may be much larger than others, which
@@ -145,7 +145,7 @@ query complexity than our estimation due to query optimization.
 {\tt average}, 
 {\tt having}, and 
 {\tt calculate}. \cong{I think no need to mention query chain. Just say the SQL query type and how we estimate.}
-\Tool currently assigns equal cost scores for each such operator.
+\ToolP currently assigns equal cost scores for each such operator.
 \fi
 
 
